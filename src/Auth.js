@@ -178,15 +178,16 @@ export default function Auth({ onLogin }) {
     e.preventDefault();
     setError('');
     if (!suName.trim()) return setError('Full name is required.');
-    if (!suEmail && !suPhone) return setError('Provide at least an email or phone number.');
+    if (!suPhone) return setError('Phone number is required for real OTP verification.');
+    if (!/^\d{10}$/.test(suPhone)) return setError('Phone must be 10 digits (without +91).');
     if (suEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(suEmail)) return setError('Invalid email address.');
-    if (suPhone && !/^\d{10}$/.test(suPhone)) return setError('Phone must be 10 digits.');
     if (suPwd.length < 6) return setError('Password must be at least 6 characters.');
     if (suPwd !== suConf) return setError('Passwords do not match.');
     const users = getUsers();
     if (suEmail && users.find(u => u.email === suEmail)) return setError('Email already registered.');
-    if (suPhone && users.find(u => u.phone === suPhone)) return setError('Phone already registered.');
-    sendOTP(suEmail || `+91 ${suPhone}`, 'signup');
+    if (users.find(u => u.phone === suPhone)) return setError('Phone already registered.');
+    // Always use phone for Firebase SMS OTP
+    sendOTP(`+91${suPhone}`, 'signup');
   }
 
   // ── OTP Verify ───────────────────────────────────────────────────────────
