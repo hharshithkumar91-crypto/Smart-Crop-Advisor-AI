@@ -432,9 +432,12 @@ export default function Auth({ onLogin }) {
             <p className="auth-sub">6-digit code sent to <strong>{otpTarget}</strong></p>
             {error && <div className="auth-err">⚠️ {error}</div>}
 
-            <div className="otp-demo-box">
-              🧪 <strong>Demo OTP:</strong> <code className="otp-code">{genOtp}</code>
-            </div>
+            {/* Only show demo OTP hint for email-based (non-phone) fallback */}
+            {genOtp && !otpTarget.startsWith('+91') && (
+              <div className="otp-demo-box">
+                🧪 <strong>Email Demo OTP:</strong> <code className="otp-code">{genOtp}</code>
+              </div>
+            )}
 
             {success && <div className="auth-ok">✅ {success}</div>}
 
