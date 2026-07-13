@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Smart-Crop-Advisor-AI/static/css/main.d5ed6d7c.css",
-    "main.js": "/Smart-Crop-Advisor-AI/static/js/main.d8ea707c.js",
+    "main.js": "/Smart-Crop-Advisor-AI/static/js/main.9c087e98.js",
     "static/js/453.20359781.chunk.js": "/Smart-Crop-Advisor-AI/static/js/453.20359781.chunk.js",
     "index.html": "/Smart-Crop-Advisor-AI/index.html",
     "main.d5ed6d7c.css.map": "/Smart-Crop-Advisor-AI/static/css/main.d5ed6d7c.css.map",
-    "main.d8ea707c.js.map": "/Smart-Crop-Advisor-AI/static/js/main.d8ea707c.js.map",
+    "main.9c087e98.js.map": "/Smart-Crop-Advisor-AI/static/js/main.9c087e98.js.map",
     "453.20359781.chunk.js.map": "/Smart-Crop-Advisor-AI/static/js/453.20359781.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d5ed6d7c.css",
-    "static/js/main.d8ea707c.js"
+    "static/js/main.9c087e98.js"
   ]
 }
