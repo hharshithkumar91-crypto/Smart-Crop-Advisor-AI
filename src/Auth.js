@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { auth } from './firebase';
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 // Simulated user database stored in localStorage
 const DB_KEY = 'smartcrop_users';
@@ -122,8 +124,6 @@ export default function Auth({ onLogin }) {
   }
 
   async function sendOTP(target, purpose) {
-    const code = generateOTP();
-    setGenOtp(code);
     setOtpPurpose(purpose);
     setOtpTarget(target);
     setOtp('');
@@ -131,27 +131,24 @@ export default function Auth({ onLogin }) {
 
     if (target.startsWith('+91')) {
       try {
-        const res = await fetch('https://textbelt.com/text', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phone: target,
-            message: `Your Smart Crop Advisor OTP code is: ${code}`,
-            key: 'textbelt',
-          }),
-        });
-        const data = await res.json();
-        setLoading(false);
-        if (data.success) {
-          setSuccess(`Real SMS OTP sent successfully to ${target}!`);
-        } else {
-          setSuccess(`Demo OTP (Daily Free Limit Reached): ${code}`);
+        if (!window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible'
+          });
         }
+        const appVerifier = window.recaptchaVerifier;
+        window.confirmationResult = await signInWithPhoneNumber(auth, target, appVerifier);
+        setLoading(false);
+        setSuccess(`Real SMS OTP sent successfully to ${target}!`);
       } catch (err) {
         setLoading(false);
-        setSuccess(`Demo OTP (Network Error): ${code}`);
+        setError(`Failed to send SMS: ${err.message}`);
+        return; // do not go to otp screen
       }
     } else {
+      // Email demo fallback
+      const code = generateOTP();
+      setGenOtp(code);
       setLoading(false);
       setSuccess(`Demo Email OTP sent: ${code}`);
     }
@@ -193,12 +190,22 @@ export default function Auth({ onLogin }) {
   }
 
   // ── OTP Verify ───────────────────────────────────────────────────────────
-  function handleOTPVerify(e) {
+  async function handleOTPVerify(e) {
     e.preventDefault();
     setError('');
     const entered = otp.replace(/\s/g, '');
     if (entered.length < 6) return setError('Enter all 6 digits.');
-    if (entered !== genOtp) return setError('Incorrect OTP. Please try again.');
+    
+    if (otpTarget.startsWith('+91') && window.confirmationResult) {
+      try {
+        await window.confirmationResult.confirm(entered);
+      } catch (err) {
+        return setError('Incorrect OTP. Please try again.');
+      }
+    } else {
+      if (entered !== genOtp) return setError('Incorrect OTP. Please try again.');
+    }
+    
     clearInterval(timerRef.current);
 
     if (otpPurpose === 'signup') {
@@ -503,6 +510,7 @@ export default function Auth({ onLogin }) {
           </div>
         )}
 
+        <div id="recaptcha-container"></div>
         <p className="auth-footer">© 2026 Smart Crop Advisor AI · Made with ❤️ for Indian Farmers</p>
       </div>
     </div>
