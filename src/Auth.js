@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth } from './firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { saveUserToFirestore, updateUserLogin, logAuthEvent, checkPhoneExists, findUserByPhone, findUserByEmail } from './firebase';
 
 // Simulated user database stored in localStorage
 const DB_KEY = 'smartcrop_users';
@@ -158,19 +159,44 @@ export default function Auth({ onLogin }) {
   }
 
   // ── Sign In ──────────────────────────────────────────────────────────────
-  function handleSignIn(e) {
+  async function handleSignIn(e) {
     e.preventDefault();
     setError(''); setLoading(true);
-    setTimeout(() => {
+    try {
+      // Try Firestore first
+      let user = null;
+      if (siId.includes('@')) {
+        user = await findUserByEmail(siId);
+      } else {
+        user = await findUserByPhone(siId);
+      }
+      // Fallback to localStorage
+      if (!user) {
+        const users = getUsers();
+        user = users.find(u =>
+          (u.email === siId || u.phone === siId) && u.password === siPwd
+        );
+      } else if (user.password !== siPwd) {
+        user = null;
+      }
+      setLoading(false);
+      if (!user) { setError('Invalid email/phone or password. Try again.'); return; }
+      // Log signin event to Firestore
+      await logAuthEvent('signin', user.phone || siId, user.name);
+      await updateUserLogin(user.phone || siId);
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      onLogin(user);
+    } catch (err) {
+      setLoading(false);
+      // Fallback to localStorage if Firestore fails
       const users = getUsers();
       const user = users.find(u =>
         (u.email === siId || u.phone === siId) && u.password === siPwd
       );
-      setLoading(false);
       if (!user) { setError('Invalid email/phone or password. Try again.'); return; }
       localStorage.setItem(SESSION_KEY, JSON.stringify(user));
       onLogin(user);
-    }, 900);
+    }
   }
 
   // ── Sign Up ──────────────────────────────────────────────────────────────
@@ -221,9 +247,16 @@ export default function Auth({ onLogin }) {
         joinedAt: new Date().toISOString(),
         avatar: suName.charAt(0).toUpperCase()
       };
+      // Save to localStorage
       users.push(newUser);
       saveUsers(users);
       localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
+      // Save to Firestore cloud database
+      try {
+        const firestoreId = await saveUserToFirestore(newUser);
+        await logAuthEvent('signup', suPhone, suName);
+        if (firestoreId) newUser.firestoreId = firestoreId;
+      } catch (e) { console.error('Firestore save failed:', e); }
       setSuccess('Account created! Welcome to Smart Crop Advisor AI 🌾');
       setTimeout(() => onLogin(newUser), 1200);
     } else {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Auth, { SESSION_KEY } from './Auth';
+import { getTotalUsers, getOnlineUsers, setUserOffline } from './firebase';
 import {
   COMMODITY_CATEGORIES, ALL_CROPS, BASE_PRICES,
   MANDI_DB, MANDI_MULTIPLIERS, INTL_PRICES,
@@ -102,8 +103,12 @@ export default function App() {
   const [schemeBank,   setSchemeBank]   = useState(true);
   const [schemeSCST,   setSchemeSCST]   = useState(false);
 
-  /* ── Language ────────────────────────────────────── */
+  /* ── Language ──────────────────────────────────── */
   const [lang, setLang] = useState('en');
+
+  /* ── User Stats from Firestore ───────────────── */
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [onlineUsers, setOnlineUsers] = useState(0);
 
   const chatEndRef = useRef(null);
 
@@ -113,6 +118,28 @@ export default function App() {
   useEffect(() => {
     const saved = localStorage.getItem(SESSION_KEY);
     if (saved) try { setUser(JSON.parse(saved)); } catch(e) {}
+    // Fetch user stats from Firestore
+    async function fetchStats() {
+      const total = await getTotalUsers();
+      const online = await getOnlineUsers();
+      setTotalUsers(total);
+      setOnlineUsers(online);
+    }
+    fetchStats();
+    // Refresh stats every 30s
+    const statsInterval = setInterval(fetchStats, 30000);
+    // Set user offline when page closes
+    const handleBeforeUnload = () => {
+      const session = localStorage.getItem(SESSION_KEY);
+      if (session) {
+        try {
+          const u = JSON.parse(session);
+          if (u.phone) setUserOffline(u.phone);
+        } catch(e) {}
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => { clearInterval(statsInterval); window.removeEventListener('beforeunload', handleBeforeUnload); };
   }, []);
 
   // Initialize live prices from BASE_PRICES
@@ -558,7 +585,21 @@ export default function App() {
         {/* ════════ TAB: OVERVIEW ════════ */}
         {activeTab==='overview' && (
           <div style={{display:'flex',flexDirection:'column',gap:'1.5rem'}}>
-            {/* Stat Cards */}
+            {/* User Stats Card */}
+            <div className="grid2" style={{marginBottom:'1rem'}}>
+              <div className="stat-card" style={{borderColor:'rgba(0,255,255,0.3)', background:'rgba(0,255,255,0.05)'}}>
+                <div style={{fontSize:'1.8rem'}}>🌍</div>
+                <div style={{fontSize:'1.5rem',fontWeight:800,color:'#00ffff'}}>{totalUsers}</div>
+                <div style={{fontSize:'.78rem',color:'#94a3b8',fontWeight:600}}>Total Registered Farmers</div>
+              </div>
+              <div className="stat-card" style={{borderColor:'rgba(255,0,255,0.3)', background:'rgba(255,0,255,0.05)'}}>
+                <div style={{fontSize:'1.8rem'}}>🟢</div>
+                <div style={{fontSize:'1.5rem',fontWeight:800,color:'#ff00ff'}}>{onlineUsers}</div>
+                <div style={{fontSize:'.78rem',color:'#94a3b8',fontWeight:600}}>Farmers Online Now</div>
+              </div>
+            </div>
+            
+            {/* Weather Stat Cards */}
             <div className="grid4">
               {[
                 { icon:'🌡', label:'Temperature',   val:weather.temp,     color:'#fb923c' },
