@@ -6,7 +6,7 @@ import {
   COMMODITY_CATEGORIES, ALL_CROPS, BASE_PRICES,
   MANDI_DB, MANDI_MULTIPLIERS, INTL_PRICES,
   INPUT_STATE_MULTIPLIER, INDIA_LOCATIONS, ALL_STATES,
-  WEATHER_DATA, GOVT_SCHEMES, MCX_COMMODITIES
+  WEATHER_DATA, GOVT_SCHEMES, MCX_COMMODITIES, FUEL_BASE_PRICES
 } from './data';
 
 /* ══════════════════════════════════════════════════════════
@@ -517,23 +517,35 @@ export default function App() {
         .tag { display:inline-flex; align-items:center; padding:.15rem .55rem; border-radius:5px; font-size:.7rem; font-weight:700; }
       `}</style>
 
-      {/* ══ MCX Live Ticker ══ */}
+      {/* ══ MEGA LIVE TICKER (Flow Line) ══ */}
       <div className="mcx-ticker-wrap">
         <div className="mcx-ticker">
-          {MCX_COMMODITIES && [...MCX_COMMODITIES,...MCX_COMMODITIES].map((m,i) => {
-            const lp = liveMcx[m.name] || m.price;
-            const base = m.price;
-            const pct = (((lp - base)/base)*100).toFixed(2);
-            const isUp = mcxTrend[m.name] !== 'down';
+          {(() => {
+            const stateMult = INPUT_STATE_MULTIPLIER[selState] || 1.0;
+            const petrol = { name: `Petrol (${selState})`, price: FUEL_BASE_PRICES.PETROL * stateMult, pct: (stateMult-1)*100 };
+            const diesel = { name: `Diesel (${selState})`, price: FUEL_BASE_PRICES.DIESEL * stateMult, pct: (stateMult-1)*100 };
+            
+            // Combine MCX with Fuel and some random agri items for a massive flow line
+            const megaTicker = [petrol, diesel, ...MCX_COMMODITIES];
+            // Add top 15 base crops to the ticker
+            Object.entries(BASE_PRICES).slice(0,15).forEach(([crop, price]) => {
+                megaTicker.push({ name: crop, price: price, pct: ((Math.random()*4)-2) }); // Simulated %
+            });
+            
+            return [...megaTicker, ...megaTicker, ...megaTicker].map((m, i) => {
+            const lp = liveMcx[m.name] || m.price || m.price;
+            const pct = m.pct !== undefined ? m.pct : (((lp - (m.price||lp))/(m.price||lp))*100);
+            const displayPct = Math.abs(pct).toFixed(2);
+            const isUp = pct >= 0 && mcxTrend[m.name] !== 'down';
             return (
               <span key={i} className="mcx-item">
-                <span style={{color:'#cc99ff'}}>{m.name}</span>
-                <span style={{color:isUp?'#00ffff':'#ff4488',fontWeight:800}}>₹{lp.toFixed(0)}</span>
-                <span style={{color:isUp?'#00ffff':'#ff4488',fontSize:'.7rem'}}>{isUp?'▲':'▼'} {Math.abs(pct)}%</span>
+                <span style={{color: m.name.includes('Petrol') || m.name.includes('Diesel') ? '#ff80ff' : '#cc99ff'}}>{m.name}</span>
+                <span style={{color:isUp?'#00ffff':'#ff4488',fontWeight:800}}>₹{lp.toFixed(m.name.includes('Petrol') ? 2 : 0)}</span>
+                <span style={{color:isUp?'#00ffff':'#ff4488',fontSize:'.7rem'}}>{isUp?'▲':'▼'} {displayPct}%</span>
                 <span style={{color:'rgba(255,0,255,.3)',margin:'0 .25rem'}}>|</span>
               </span>
             );
-          })}
+          })})()}
         </div>
       </div>
 
@@ -599,6 +611,23 @@ export default function App() {
               </div>
             </div>
             
+            {/* Macro Economy & Fuel Cards */}
+            <div className="section-title">⚖️ MACRO ECONOMY & FUEL (Live for {selState})</div>
+            <div className="grid4" style={{marginBottom:'1rem'}}>
+              {[
+                { icon:'🪙', label:'Gold (10g)', val: (liveMcx['Gold (10g)'] || 72450).toFixed(0), color:'#ffd700', bg:'rgba(255,215,0,0.05)', border:'rgba(255,215,0,0.3)' },
+                { icon:'☁️', label:'Cotton (Bale)', val: (liveMcx['Cotton (170kg)'] || 28500).toFixed(0), color:'#ffffff', bg:'rgba(255,255,255,0.05)', border:'rgba(255,255,255,0.3)' },
+                { icon:'⛽', label:'Petrol (1L)', val: (FUEL_BASE_PRICES.PETROL * (INPUT_STATE_MULTIPLIER[selState] || 1.0)).toFixed(2), color:'#ff4488', bg:'rgba(255,68,136,0.05)', border:'rgba(255,68,136,0.3)' },
+                { icon:'🛢️', label:'Diesel (1L)', val: (FUEL_BASE_PRICES.DIESEL * (INPUT_STATE_MULTIPLIER[selState] || 1.0)).toFixed(2), color:'#00ffff', bg:'rgba(0,255,255,0.05)', border:'rgba(0,255,255,0.3)' },
+              ].map(s=>(
+                <div key={s.label} className="stat-card" style={{borderColor:s.border, background:s.bg}}>
+                  <div style={{fontSize:'1.8rem'}}>{s.icon}</div>
+                  <div style={{fontSize:'1.5rem',fontWeight:800,color:s.color}}>₹{s.val}</div>
+                  <div style={{fontSize:'.78rem',color:'#94a3b8',fontWeight:600}}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+
             {/* Weather Stat Cards */}
             <div className="grid4">
               {[
