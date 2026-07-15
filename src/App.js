@@ -357,16 +357,16 @@ export default function App() {
   ];
 
   return (
-    <div className="App-container" style={{ display: 'flex', minHeight: '100vh', background: '#080c14', fontFamily:"'Orbitron',monospace", color:'#e0d0ff' }}>
+    <div className="App-container" style={{ display: 'flex', minHeight: '100vh', background: '#000000', fontFamily:"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", color:'#e0d0ff' }}>
       
       {/* ── Left Sidebar Navigation ── */}
-      <aside style={{ width: 280, background: 'rgba(15,22,36,0.98)', borderRight: '1px solid rgba(255,255,255,0.06)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', flexShrink: 0, backdropFilter:'blur(20px)', boxShadow:'5px 0 30px rgba(0,0,0,0.5)' }}>
+      <aside style={{ width: 280, background: '#000000', borderRight: '1px solid #262626', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', flexShrink: 0, backdropFilter:'blur(20px)', boxShadow:'none' }}>
         {/* Brand Logo inside Sidebar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '.8rem', marginBottom: '1rem' }}>
-          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'linear-gradient(135deg,#10b981,#3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: '0 0 15px rgba(16,185,129,0.4)' }}>🌴</div>
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: 'none' }}>🌴</div>
           <div>
-            <div style={{ fontWeight: 950, fontSize: '1.1rem', color: '#10b981', letterSpacing: '.05em', fontFamily: "'Orbitron',monospace", textShadow: '0 0 10px rgba(16,185,129,0.3)' }}>SMART CROP AI</div>
-            <div style={{ fontSize: '.62rem', color: '#3b82f6', fontWeight: 700, letterSpacing: '.1em', textShadow: 'none' }}>◈ AGRI PORTAL ◈</div>
+            <div style={{ fontWeight: 950, fontSize: '1.1rem', color: '#ffffff', letterSpacing: '.05em', fontFamily: "'Orbitron',monospace", textShadow: 'none' }}>SMART CROP AI</div>
+            <div style={{ fontSize: '.62rem', color: '#a8a8a8', fontWeight: 700, letterSpacing: '.1em', textShadow: 'none' }}>◈ Farm Assistant ◈</div>
           </div>
         </div>
 
@@ -384,12 +384,12 @@ export default function App() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
       {/* ── Inline keyframe CSS ── */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         * { box-sizing:border-box; margin:0; padding:0; }
         body {
-          font-family:'Rajdhani',sans-serif !important;
-          background: #080c14;
-          background-attachment: fixed;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+          background: #000000;
+          color: #ffffff;
         }
         ::-webkit-scrollbar { width:6px; height:6px; }
         ::-webkit-scrollbar-track { background:rgba(16,185,129,0.05); }
@@ -406,19 +406,15 @@ export default function App() {
         @keyframes float     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
         .card {
-          background: rgba(17,24,39,0.7);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 16px;
+          background: #121212;
+          border: 1px solid #262626;
+          border-radius: 12px;
           padding: 1.5rem;
-          backdrop-filter: blur(20px);
-          animation: fadeIn .4s ease;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.02);
-          transition: all 0.25s ease;
+          animation: fadeIn .3s ease;
+          transition: border-color 0.2s ease;
         }
         .card:hover {
-          border-color: rgba(16,185,129,0.35);
-          box-shadow: 0 4px 25px rgba(16,185,129,0.08);
-          transform: translateY(-2px);
+          border-color: #363636;
         }
 
         .badge { display:inline-flex; align-items:center; padding:.2rem .7rem; border-radius:20px; font-size:.75rem; font-weight:700; }
@@ -428,19 +424,19 @@ export default function App() {
           gap: .4rem; padding: .65rem 1.4rem; border-radius: 8px;
           border: none; cursor: pointer; font-weight: 700;
           font-size: .875rem; transition: all .2s;
-          font-family: 'Orbitron', monospace; letter-spacing: 0.05em;
+          
         }
         .btn-primary {
-          background: linear-gradient(135deg, #10b981, #059669);
-          color: #fff;
+          background: #0095f6;
+          color: #ffffff;
           box-shadow: 0 0 20px rgba(255,0,255,0.4);
         }
         .btn-primary:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(16,185,129,0.4);
+          box-shadow: none;
         }
         .btn-outline {
-          background: rgba(255,255,255,0.02);
+          background: transparent;
           border: 1px solid rgba(0,255,255,.5);
           color: #10b981;
           box-shadow: 0 0 10px rgba(0,255,255,0.2);
@@ -477,18 +473,19 @@ export default function App() {
           display: flex; align-items: center; gap: .5rem;
           padding: .6rem 1rem; border-radius: 8px; border: 1px solid transparent;
           cursor: pointer; font-size: .78rem; font-weight: 700;
-          background: transparent; color: #aa88cc;
+          background: transparent; color: #8e8e8e;
           transition: all .2s; white-space: nowrap;
-          font-family: 'Orbitron', monospace; letter-spacing: 0.03em;
+          font-family: 'Inter', sans-serif;
         }
         .tab-btn.active {
-          background: rgba(16,185,129,0.08);
-          color: #10b981;
-          border-color: rgba(16,185,129,0.3);
-          box-shadow: inset 0 0 8px rgba(16,185,129,0.15);
+          background: #121212;
+          color: #ffffff;
+          border-color: #262626;
+          font-weight: 700;
+          box-shadow: none;
         }
         .tab-btn:hover:not(.active) {
-          background: rgba(255,255,255,0.02);
+          background: transparent;
           color: #10b981;
           border-color: rgba(0,255,255,.2);
         }
@@ -525,16 +522,16 @@ export default function App() {
         .chat-bubble.user { background:rgba(255,0,255,.15); border:1px solid rgba(255,0,255,.35); align-self:flex-end; }
         .chat-bubble.bot  { background:rgba(0,255,255,.08); border:1px solid rgba(0,255,255,.2); align-self:flex-start; }
 
-        .scan-btn { border:1px solid rgba(0,255,255,.3); border-radius:8px; background:rgba(0,255,255,.06); color:#00ffff; padding:.5rem 1rem; cursor:pointer; font-size:.78rem; font-weight:700; transition:all .2s; font-family:'Orbitron',monospace; }
+        .scan-btn { border:1px solid rgba(0,255,255,.3); border-radius:8px; background:rgba(0,255,255,.06); color:#00ffff; padding:.5rem 1rem; cursor:pointer; font-size:.78rem; font-weight:700; transition:all .2s; font-family:'Inter',sans-serif; }
         .scan-btn.active { background:rgba(0,255,255,.18); border-color:#00ffff; box-shadow:0 0 15px rgba(0,255,255,0.3); }
 
         .ledger-item { display:flex; justify-content:space-between; align-items:center; padding:.65rem .9rem; border-radius:8px; font-size:.82rem; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.04); }
 
-        .section-title { font-size:1rem; font-weight:800; color:#10b981; display:flex; align-items:center; gap:.5rem; margin-bottom:1rem; font-family:'Orbitron',monospace; letter-spacing:0.05em; text-shadow:none; }
+        .section-title { font-size:1rem; font-weight:700; color:#ffffff; display:flex; align-items:center; gap:.5rem; margin-bottom:1rem; font-family:'Inter',sans-serif; }
 
-        .mcx-ticker-wrap { background:rgba(5,0,15,.98); border-bottom:1px solid rgba(255,0,255,.2); padding:.5rem 0; overflow:hidden; position:relative; box-shadow:0 2px 20px rgba(255,0,255,0.15); }
+        .mcx-ticker-wrap { background:#121212; border-bottom:1px solid #262626; padding:.5rem 0; overflow:hidden; position:relative; box-shadow:none; }
         .mcx-ticker { display:flex; gap:2.5rem; animation:ticker 60s linear infinite; white-space:nowrap; padding:.1rem 0; }
-        .mcx-item { display:flex; align-items:center; gap:.4rem; font-size:.75rem; font-weight:700; font-family:'Orbitron',monospace; }
+        .mcx-item { display:flex; align-items:center; gap:.4rem; font-size:.75rem; font-weight:700; font-family:'Inter',sans-serif; }
         .tag { display:inline-flex; align-items:center; padding:.15rem .55rem; border-radius:5px; font-size:.7rem; font-weight:700; }
       `}</style>
 
@@ -571,7 +568,7 @@ export default function App() {
       </div>
 
       {/* ══ Top Header ══ */}
-      <header style={{ background:'rgba(15,22,36,0.98)', borderBottom:'1px solid rgba(255,255,255,.06)', padding:'1rem 1.5rem', display:'flex', justifyContent:'flex-end', alignItems:'center', position:'sticky', top:0, zIndex:100, backdropFilter:'blur(20px)', boxShadow:'0 4px 20px rgba(0,0,0,0.3)' }}>
+      <header style={{ background:'#000000', borderBottom:'1px solid #262626', padding:'1rem 1.5rem', display:'flex', justifyContent:'flex-end', alignItems:'center', position:'sticky', top:0, zIndex:100, backdropFilter:'blur(20px)', boxShadow:'none' }}>
         {/* Location pickers, Lang, user detail & logout */}
         <div style={{ display:'flex', gap:'.6rem', alignItems:'center', flexWrap:'wrap' }}>
           <select className="input" style={{width:'auto',padding:'.4rem .7rem',fontSize:'.8rem'}} value={selState} onChange={e=>handleStateChange(e.target.value)}>
@@ -616,9 +613,9 @@ export default function App() {
                 { icon:'⛽', label:'Petrol (1L)', val: (FUEL_BASE_PRICES.PETROL * (INPUT_STATE_MULTIPLIER[selState] || 1.0)).toFixed(2), color:'#10b981', bg:'rgba(16,185,129,0.03)', border:'rgba(16,185,129,0.15)' },
                 { icon:'🛢️', label:'Diesel (1L)', val: (FUEL_BASE_PRICES.DIESEL * (INPUT_STATE_MULTIPLIER[selState] || 1.0)).toFixed(2), color:'#3b82f6', bg:'rgba(59,130,246,0.03)', border:'rgba(59,130,246,0.15)' },
               ].map(s=>(
-                <div key={s.label} className="stat-card" style={{borderColor:s.border, background:s.bg}}>
+                <div key={s.label} className="stat-card" style={{borderColor:'#262626', background:'#121212'}}>
                   <div style={{fontSize:'1.8rem'}}>{s.icon}</div>
-                  <div style={{fontSize:'1.5rem',fontWeight:800,color:s.color}}>₹{s.val}</div>
+                  <div style={{fontSize:'1.5rem',fontWeight:800,color:'#ffffff'}}>₹{s.val}</div>
                   <div style={{fontSize:'.78rem',color:'#94a3b8',fontWeight:600}}>{s.label}</div>
                 </div>
               ))}
@@ -634,7 +631,7 @@ export default function App() {
               ].map(s=>(
                 <div key={s.label} className="stat-card">
                   <div style={{fontSize:'1.8rem'}}>{s.icon}</div>
-                  <div style={{fontSize:'1.5rem',fontWeight:800,color:s.color}}>{s.val}</div>
+                  <div style={{fontSize:'1.5rem',fontWeight:800,color:'#ffffff'}}>{s.val}</div>
                   <div style={{fontSize:'.78rem',color:'#94a3b8',fontWeight:600}}>{s.label}</div>
                 </div>
               ))}
