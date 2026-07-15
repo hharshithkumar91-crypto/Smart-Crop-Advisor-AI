@@ -357,16 +357,16 @@ export default function App() {
   ];
 
   return (
-    <div className="App-container" style={{ display: 'flex', minHeight: '100vh', background: '#0d0015', fontFamily:"'Orbitron',monospace", color:'#e0d0ff' }}>
+    <div className="App-container" style={{ display: 'flex', minHeight: '100vh', background: '#080c14', fontFamily:"'Orbitron',monospace", color:'#e0d0ff' }}>
       
       {/* ── Left Sidebar Navigation ── */}
-      <aside style={{ width: 280, background: 'rgba(13,0,21,0.98)', borderRight: '1px solid rgba(255,0,255,0.25)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', flexShrink: 0, backdropFilter:'blur(20px)', boxShadow:'5px 0 30px rgba(255,0,255,0.05)' }}>
+      <aside style={{ width: 280, background: 'rgba(15,22,36,0.98)', borderRight: '1px solid rgba(255,255,255,0.06)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', flexShrink: 0, backdropFilter:'blur(20px)', boxShadow:'5px 0 30px rgba(0,0,0,0.5)' }}>
         {/* Brand Logo inside Sidebar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '.8rem', marginBottom: '1rem' }}>
-          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'linear-gradient(135deg,#ff00ff,#8800ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: '0 0 20px rgba(255,0,255,0.6)' }}>🌴</div>
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'linear-gradient(135deg,#10b981,#3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: '0 0 15px rgba(16,185,129,0.4)' }}>🌴</div>
           <div>
-            <div style={{ fontWeight: 950, fontSize: '1.1rem', color: '#ff80ff', letterSpacing: '.05em', fontFamily: "'Orbitron',monospace", textShadow: '0 0 20px rgba(255,0,255,0.6)' }}>SMART CROP AI</div>
-            <div style={{ fontSize: '.62rem', color: '#00ffff', fontWeight: 700, letterSpacing: '.1em', textShadow: '0 0 10px rgba(0,255,255,0.5)' }}>◈ AGRI PORTAL ◈</div>
+            <div style={{ fontWeight: 950, fontSize: '1.1rem', color: '#10b981', letterSpacing: '.05em', fontFamily: "'Orbitron',monospace", textShadow: '0 0 10px rgba(16,185,129,0.3)' }}>SMART CROP AI</div>
+            <div style={{ fontSize: '.62rem', color: '#3b82f6', fontWeight: 700, letterSpacing: '.1em', textShadow: 'none' }}>◈ AGRI PORTAL ◈</div>
           </div>
         </div>
 
@@ -388,15 +388,12 @@ export default function App() {
         * { box-sizing:border-box; margin:0; padding:0; }
         body {
           font-family:'Rajdhani',sans-serif !important;
-          background: #0d0015;
-          background-image:
-            repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,0,255,0.07) 40px),
-            repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,255,255,0.07) 40px);
+          background: #080c14;
           background-attachment: fixed;
         }
         ::-webkit-scrollbar { width:6px; height:6px; }
-        ::-webkit-scrollbar-track { background:rgba(255,0,255,0.05); }
-        ::-webkit-scrollbar-thumb { background:linear-gradient(#ff00ff,#00ffff); border-radius:3px; }
+        ::-webkit-scrollbar-track { background:rgba(16,185,129,0.05); }
+        ::-webkit-scrollbar-thumb { background:linear-gradient(#10b981,#3b82f6); border-radius:3px; }
 
         @keyframes priceUp   { 0%{background:rgba(0,255,255,0.3)} 100%{background:transparent} }
         @keyframes priceDown { 0%{background:rgba(255,0,128,0.3)}  100%{background:transparent} }
@@ -409,18 +406,18 @@ export default function App() {
         @keyframes float     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
         .card {
-          background: rgba(20,0,40,0.85);
-          border: 1px solid rgba(255,0,255,0.25);
+          background: rgba(17,24,39,0.7);
+          border: 1px solid rgba(255,255,255,0.06);
           border-radius: 16px;
           padding: 1.5rem;
           backdrop-filter: blur(20px);
           animation: fadeIn .4s ease;
-          box-shadow: 0 0 20px rgba(255,0,255,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
-          transition: all 0.3s;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.02);
+          transition: all 0.25s ease;
         }
         .card:hover {
-          border-color: rgba(0,255,255,0.5);
-          box-shadow: 0 0 30px rgba(0,255,255,0.2);
+          border-color: rgba(16,185,129,0.35);
+          box-shadow: 0 4px 25px rgba(16,185,129,0.08);
           transform: translateY(-2px);
         }
 
@@ -434,18 +431,18 @@ export default function App() {
           font-family: 'Orbitron', monospace; letter-spacing: 0.05em;
         }
         .btn-primary {
-          background: linear-gradient(135deg, #ff00ff, #8800ff);
+          background: linear-gradient(135deg, #10b981, #059669);
           color: #fff;
           box-shadow: 0 0 20px rgba(255,0,255,0.4);
         }
         .btn-primary:hover {
           transform: translateY(-2px);
-          box-shadow: 0 0 40px rgba(255,0,255,0.7), 0 4px 20px rgba(255,0,255,0.4);
+          box-shadow: 0 6px 20px rgba(16,185,129,0.4);
         }
         .btn-outline {
-          background: rgba(0,255,255,.08);
+          background: rgba(255,255,255,0.02);
           border: 1px solid rgba(0,255,255,.5);
-          color: #00ffff;
+          color: #10b981;
           box-shadow: 0 0 10px rgba(0,255,255,0.2);
         }
         .btn-outline:hover {
@@ -456,7 +453,7 @@ export default function App() {
         .input {
           width: 100%; padding: .65rem .9rem;
           background: rgba(255,255,255,.04);
-          border: 1px solid rgba(255,0,255,.25);
+          border: 1px solid rgba(255,255,255,.08);
           border-radius: 8px; color: #e0d0ff;
           font-size: .875rem; outline: none;
           font-family: 'Rajdhani', sans-serif;
@@ -485,14 +482,14 @@ export default function App() {
           font-family: 'Orbitron', monospace; letter-spacing: 0.03em;
         }
         .tab-btn.active {
-          background: rgba(255,0,255,.15);
-          color: #ff80ff;
-          border-color: rgba(255,0,255,.5);
-          box-shadow: 0 0 15px rgba(255,0,255,0.3);
+          background: rgba(16,185,129,0.08);
+          color: #10b981;
+          border-color: rgba(16,185,129,0.3);
+          box-shadow: inset 0 0 8px rgba(16,185,129,0.15);
         }
         .tab-btn:hover:not(.active) {
-          background: rgba(0,255,255,.08);
-          color: #00ffff;
+          background: rgba(255,255,255,0.02);
+          color: #10b981;
           border-color: rgba(0,255,255,.2);
         }
 
@@ -517,12 +514,12 @@ export default function App() {
 
         .scheme-card {
           background: rgba(20,0,40,0.9);
-          border: 1px solid rgba(255,0,255,.15);
+          border: 1px solid rgba(255,255,255,.05);
           border-radius: 12px; padding: 1.25rem;
           display: flex; flex-direction: column; gap: .7rem;
           transition: all .25s;
         }
-        .scheme-card:hover { border-color:rgba(0,255,255,.4); transform:translateY(-3px); box-shadow:0 0 20px rgba(0,255,255,0.15); }
+        .scheme-card:hover { border-color:rgba(16,185,129,.3); transform:translateY(-3px); box-shadow:0 4px 20px rgba(0,0,0,0.25); }
 
         .chat-bubble { padding:.75rem 1rem; border-radius:12px; max-width:80%; font-size:.875rem; line-height:1.5; animation:fadeIn .3s ease; }
         .chat-bubble.user { background:rgba(255,0,255,.15); border:1px solid rgba(255,0,255,.35); align-self:flex-end; }
@@ -531,9 +528,9 @@ export default function App() {
         .scan-btn { border:1px solid rgba(0,255,255,.3); border-radius:8px; background:rgba(0,255,255,.06); color:#00ffff; padding:.5rem 1rem; cursor:pointer; font-size:.78rem; font-weight:700; transition:all .2s; font-family:'Orbitron',monospace; }
         .scan-btn.active { background:rgba(0,255,255,.18); border-color:#00ffff; box-shadow:0 0 15px rgba(0,255,255,0.3); }
 
-        .ledger-item { display:flex; justify-content:space-between; align-items:center; padding:.65rem .9rem; border-radius:8px; font-size:.82rem; background:rgba(255,255,255,.02); border:1px solid rgba(255,0,255,.1); }
+        .ledger-item { display:flex; justify-content:space-between; align-items:center; padding:.65rem .9rem; border-radius:8px; font-size:.82rem; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.04); }
 
-        .section-title { font-size:1rem; font-weight:800; color:#ff80ff; display:flex; align-items:center; gap:.5rem; margin-bottom:1rem; font-family:'Orbitron',monospace; letter-spacing:0.05em; text-shadow:0 0 15px rgba(255,0,255,0.5); }
+        .section-title { font-size:1rem; font-weight:800; color:#10b981; display:flex; align-items:center; gap:.5rem; margin-bottom:1rem; font-family:'Orbitron',monospace; letter-spacing:0.05em; text-shadow:none; }
 
         .mcx-ticker-wrap { background:rgba(5,0,15,.98); border-bottom:1px solid rgba(255,0,255,.2); padding:.5rem 0; overflow:hidden; position:relative; box-shadow:0 2px 20px rgba(255,0,255,0.15); }
         .mcx-ticker { display:flex; gap:2.5rem; animation:ticker 60s linear infinite; white-space:nowrap; padding:.1rem 0; }
@@ -574,7 +571,7 @@ export default function App() {
       </div>
 
       {/* ══ Top Header ══ */}
-      <header style={{ background:'rgba(13,0,21,0.98)', borderBottom:'1px solid rgba(255,0,255,.25)', padding:'1rem 1.5rem', display:'flex', justifyContent:'flex-end', alignItems:'center', position:'sticky', top:0, zIndex:100, backdropFilter:'blur(20px)', boxShadow:'0 2px 30px rgba(255,0,255,0.15)' }}>
+      <header style={{ background:'rgba(15,22,36,0.98)', borderBottom:'1px solid rgba(255,255,255,.06)', padding:'1rem 1.5rem', display:'flex', justifyContent:'flex-end', alignItems:'center', position:'sticky', top:0, zIndex:100, backdropFilter:'blur(20px)', boxShadow:'0 4px 20px rgba(0,0,0,0.3)' }}>
         {/* Location pickers, Lang, user detail & logout */}
         <div style={{ display:'flex', gap:'.6rem', alignItems:'center', flexWrap:'wrap' }}>
           <select className="input" style={{width:'auto',padding:'.4rem .7rem',fontSize:'.8rem'}} value={selState} onChange={e=>handleStateChange(e.target.value)}>
@@ -616,8 +613,8 @@ export default function App() {
               {[
                 { icon:'🪙', label:'Gold (10g)', val: (liveMcx['Gold (10g)'] || 72450).toFixed(0), color:'#ffd700', bg:'rgba(255,215,0,0.05)', border:'rgba(255,215,0,0.3)' },
                 { icon:'☁️', label:'Cotton (Bale)', val: (liveMcx['Cotton (170kg)'] || 28500).toFixed(0), color:'#ffffff', bg:'rgba(255,255,255,0.05)', border:'rgba(255,255,255,0.3)' },
-                { icon:'⛽', label:'Petrol (1L)', val: (FUEL_BASE_PRICES.PETROL * (INPUT_STATE_MULTIPLIER[selState] || 1.0)).toFixed(2), color:'#ff4488', bg:'rgba(255,68,136,0.05)', border:'rgba(255,68,136,0.3)' },
-                { icon:'🛢️', label:'Diesel (1L)', val: (FUEL_BASE_PRICES.DIESEL * (INPUT_STATE_MULTIPLIER[selState] || 1.0)).toFixed(2), color:'#00ffff', bg:'rgba(0,255,255,0.05)', border:'rgba(0,255,255,0.3)' },
+                { icon:'⛽', label:'Petrol (1L)', val: (FUEL_BASE_PRICES.PETROL * (INPUT_STATE_MULTIPLIER[selState] || 1.0)).toFixed(2), color:'#10b981', bg:'rgba(16,185,129,0.03)', border:'rgba(16,185,129,0.15)' },
+                { icon:'🛢️', label:'Diesel (1L)', val: (FUEL_BASE_PRICES.DIESEL * (INPUT_STATE_MULTIPLIER[selState] || 1.0)).toFixed(2), color:'#3b82f6', bg:'rgba(59,130,246,0.03)', border:'rgba(59,130,246,0.15)' },
               ].map(s=>(
                 <div key={s.label} className="stat-card" style={{borderColor:s.border, background:s.bg}}>
                   <div style={{fontSize:'1.8rem'}}>{s.icon}</div>
