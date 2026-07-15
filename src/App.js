@@ -357,7 +357,31 @@ export default function App() {
   ];
 
   return (
-    <div style={{ fontFamily:"'Orbitron',monospace", background:'#0d0015', minHeight:'100vh', color:'#e0d0ff' }}>
+    <div className="App-container" style={{ display: 'flex', minHeight: '100vh', background: '#0d0015', fontFamily:"'Orbitron',monospace", color:'#e0d0ff' }}>
+      
+      {/* ── Left Sidebar Navigation ── */}
+      <aside style={{ width: 280, background: 'rgba(13,0,21,0.98)', borderRight: '1px solid rgba(255,0,255,0.25)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', flexShrink: 0, backdropFilter:'blur(20px)', boxShadow:'5px 0 30px rgba(255,0,255,0.05)' }}>
+        {/* Brand Logo inside Sidebar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.8rem', marginBottom: '1rem' }}>
+          <div style={{ width: 42, height: 42, borderRadius: 10, background: 'linear-gradient(135deg,#ff00ff,#8800ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', boxShadow: '0 0 20px rgba(255,0,255,0.6)' }}>🌴</div>
+          <div>
+            <div style={{ fontWeight: 950, fontSize: '1.1rem', color: '#ff80ff', letterSpacing: '.05em', fontFamily: "'Orbitron',monospace", textShadow: '0 0 20px rgba(255,0,255,0.6)' }}>SMART CROP AI</div>
+            <div style={{ fontSize: '.62rem', color: '#00ffff', fontWeight: 700, letterSpacing: '.1em', textShadow: '0 0 10px rgba(0,255,255,0.5)' }}>◈ AGRI PORTAL ◈</div>
+          </div>
+        </div>
+
+        {/* Navigation inside Sidebar */}
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
+          {TABS.map(t => (
+            <button key={t.id} className={`tab-btn${activeTab === t.id ? ' active' : ''}`} onClick={() => setActiveTab(t.id)} style={{ width: '100%', justifyContent: 'flex-start' }}>
+              <span style={{ marginRight: '8px' }}>{t.icon}</span> {t.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      {/* ── Right Content Area ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
       {/* ── Inline keyframe CSS ── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
@@ -550,15 +574,8 @@ export default function App() {
       </div>
 
       {/* ══ Top Header ══ */}
-      <header style={{ background:'rgba(13,0,21,0.98)', borderBottom:'1px solid rgba(255,0,255,.25)', padding:'1rem 1.5rem', display:'flex', justifyContent:'space-between', alignItems:'center', position:'sticky', top:0, zIndex:100, backdropFilter:'blur(20px)', boxShadow:'0 2px 30px rgba(255,0,255,0.15)' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:'.8rem' }}>
-          <div style={{ width:42, height:42, borderRadius:10, background:'linear-gradient(135deg,#ff00ff,#8800ff)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.2rem', boxShadow:'0 0 20px rgba(255,0,255,0.6)' }}>🌴</div>
-          <div>
-            <div style={{ fontWeight:900, fontSize:'1.05rem', color:'#ff80ff', letterSpacing:'.05em', fontFamily:"'Orbitron',monospace", textShadow:'0 0 20px rgba(255,0,255,0.6)' }}>SMART CROP AI</div>
-            <div style={{ fontSize:'.68rem', color:'#00ffff', fontWeight:700, letterSpacing:'.12em', textShadow:'0 0 10px rgba(0,255,255,0.5)' }}>◈ LIVE MARKET INTELLIGENCE PLATFORM ◈</div>
-          </div>
-        </div>
-        {/* Location pickers */}
+      <header style={{ background:'rgba(13,0,21,0.98)', borderBottom:'1px solid rgba(255,0,255,.25)', padding:'1rem 1.5rem', display:'flex', justifyContent:'flex-end', alignItems:'center', position:'sticky', top:0, zIndex:100, backdropFilter:'blur(20px)', boxShadow:'0 2px 30px rgba(255,0,255,0.15)' }}>
+        {/* Location pickers, Lang, user detail & logout */}
         <div style={{ display:'flex', gap:'.6rem', alignItems:'center', flexWrap:'wrap' }}>
           <select className="input" style={{width:'auto',padding:'.4rem .7rem',fontSize:'.8rem'}} value={selState} onChange={e=>handleStateChange(e.target.value)}>
             {ALL_STATES && ALL_STATES.map(s=><option key={s} value={s}>{s}</option>)}
@@ -582,34 +599,16 @@ export default function App() {
         </div>
       </header>
 
-      {/* ══ Tab Navigation ══ */}
-      <nav style={{ background:'rgba(10,18,30,.95)', borderBottom:'1px solid rgba(74,222,128,.08)', padding:'.6rem 1.5rem', display:'flex', gap:'.4rem', overflowX:'auto' }}>
-        {TABS.map(t => (
-          <button key={t.id} className={`tab-btn${activeTab===t.id?' active':''}`} onClick={()=>setActiveTab(t.id)}>
-            <span>{t.icon}</span> {t.label}
-          </button>
-        ))}
-      </nav>
 
-      {/* ══ Main Content ══ */}
-      <main style={{ maxWidth:1400, margin:'0 auto', padding:'1.5rem' }}>
+
+      {/* ══ Main Scrollable Content Area ══ */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+        <main style={{ maxWidth: 1400, margin: '0 auto' }}>
 
         {/* ════════ TAB: OVERVIEW ════════ */}
         {activeTab==='overview' && (
           <div style={{display:'flex',flexDirection:'column',gap:'1.5rem'}}>
-            {/* User Stats Card */}
-            <div className="grid2" style={{marginBottom:'1rem'}}>
-              <div className="stat-card" style={{borderColor:'rgba(0,255,255,0.3)', background:'rgba(0,255,255,0.05)'}}>
-                <div style={{fontSize:'1.8rem'}}>🌍</div>
-                <div style={{fontSize:'1.5rem',fontWeight:800,color:'#00ffff'}}>{totalUsers}</div>
-                <div style={{fontSize:'.78rem',color:'#94a3b8',fontWeight:600}}>Total Registered Farmers</div>
-              </div>
-              <div className="stat-card" style={{borderColor:'rgba(255,0,255,0.3)', background:'rgba(255,0,255,0.05)'}}>
-                <div style={{fontSize:'1.8rem'}}>🟢</div>
-                <div style={{fontSize:'1.5rem',fontWeight:800,color:'#ff00ff'}}>{onlineUsers}</div>
-                <div style={{fontSize:'.78rem',color:'#94a3b8',fontWeight:600}}>Farmers Online Now</div>
-              </div>
-            </div>
+
             
             {/* Macro Economy & Fuel Cards */}
             <div className="section-title">⚖️ MACRO ECONOMY & FUEL (Live for {selState})</div>
