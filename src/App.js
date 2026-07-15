@@ -1083,6 +1083,8 @@ export default function App() {
         )}
 
       </main>
+      </div> {/* Closing Main Scrollable Content Area */}
+      </div> {/* Closing Right Content Area */}
 
       {/* ══ Footer ══ */}
       <footer style={{borderTop:'1px solid rgba(74,222,128,.08)',padding:'1.25rem 1.5rem',textAlign:'center',fontSize:'.78rem',color:'#475569',marginTop:'2rem'}}>
