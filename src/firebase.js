@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, serverTimestamp, onSnapshot, orderBy, limit } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, getDoc, query, where, updateDoc, doc, serverTimestamp, orderBy, limit } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBOjbUa99WcMROIWsaGbvFBoLoYPEE2_KY",
@@ -35,10 +35,12 @@ export async function saveUserToFirestore(userData) {
   }
 }
 
-// Update user login status
-export async function updateUserLogin(phone) {
+// Update user login status — supports both phone and email lookup
+export async function updateUserLogin(identifier) {
   try {
-    const q = query(collection(db, "users"), where("phone", "==", phone));
+    const isEmail = identifier && identifier.includes('@');
+    const field = isEmail ? "email" : "phone";
+    const q = query(collection(db, "users"), where(field, "==", identifier));
     const snapshot = await getDocs(q);
     if (!snapshot.empty) {
       const userDoc = snapshot.docs[0];
@@ -72,7 +74,7 @@ export async function setUserOffline(phone) {
 export async function logAuthEvent(type, phone, name) {
   try {
     await addDoc(collection(db, "auth_logs"), {
-      type: type, // 'signup' or 'signin'
+      type: type,
       phone: phone,
       name: name || '',
       timestamp: serverTimestamp()
@@ -156,5 +158,67 @@ export async function getRecentAuthLogs(count = 10) {
   } catch (e) {
     console.error("Error getting auth logs:", e);
     return [];
+  }
+}
+
+// Fetch all registered users/farmers
+export async function getAllUsers() {
+  try {
+    const snapshot = await getDocs(collection(db, "users"));
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.error("Error fetching all users:", e);
+    return [];
+  }
+}
+
+// Add a P2P marketplace listing
+export async function addListing(listingData) {
+  try {
+    const docRef = await addDoc(collection(db, "listings"), {
+      ...listingData,
+      createdAt: serverTimestamp(),
+      rating: listingData.rating || 5,
+      ratingCount: listingData.ratingCount || 1
+    });
+    return docRef.id;
+  } catch (e) {
+    console.error("Error adding listing:", e);
+    return null;
+  }
+}
+
+// Get all active marketplace listings
+export async function getActiveListings() {
+  try {
+    const snapshot = await getDocs(collection(db, "listings"));
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.error("Error getting listings:", e);
+    return [];
+  }
+}
+
+// Rate a marketplace listing (updates the running average rating)
+export async function rateListing(listingId, userRating) {
+  try {
+    const docRef = doc(db, "listings", listingId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const currentRating = data.rating || 5;
+      const currentCount = data.ratingCount || 1;
+      const newCount = currentCount + 1;
+      const newRating = parseFloat(((currentRating * currentCount + userRating) / newCount).toFixed(1));
+      await updateDoc(docRef, {
+        rating: newRating,
+        ratingCount: newCount
+      });
+      return { rating: newRating, ratingCount: newCount };
+    }
+    return null;
+  } catch (e) {
+    console.error("Error rating listing:", e);
+    return null;
   }
 }

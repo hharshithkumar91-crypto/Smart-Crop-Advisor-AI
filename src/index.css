@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap');
+
+:root {
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Premium Dark Forest Emerald & Crop Gold Theme */
+  --bg-primary: 145 30% 6%;
+  --bg-secondary: 145 25% 10%;
+  --bg-tertiary: 145 20% 14%;
+  
+  --primary: 142 76% 45%;         /* Vivid Emerald Green */
+  --primary-glow: 142 76% 45% / 0.15;
+  --secondary: 45 95% 50%;        /* Crop Golden Yellow */
+  --secondary-glow: 45 95% 50% / 0.15;
+  --accent-blue: 195 90% 50%;     /* Water/Irrigation Blue */
+  --accent-red: 355 85% 60%;      /* Risk/Disease Red */
+  
+  --text-primary: 145 20% 98%;
+  --text-secondary: 145 12% 75%;
+  --text-muted: 145 8% 50%;
+  
+  --border: 145 15% 16%;
+  --border-focus: 142 76% 45% / 0.4;
+  
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.7);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  background-color: hsl(var(--bg-primary));
+  color: hsl(var(--text-primary));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--bg-primary));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--bg-tertiary));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, monospace;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2em 0.5em;
+  border-radius: 6px;
+  font-size: 0.85em;
+  color: hsl(var(--secondary));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+

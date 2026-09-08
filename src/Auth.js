@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { auth, googleProvider } from './firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, signInWithPopup } from "firebase/auth";
-import { saveUserToFirestore, updateUserLogin, logAuthEvent, checkPhoneExists, findUserByPhone, findUserByEmail } from './firebase';
+import { saveUserToFirestore, updateUserLogin, logAuthEvent, findUserByPhone, findUserByEmail } from './firebase';
 
 // Simulated user database stored in localStorage
 const DB_KEY = 'smartcrop_users';
@@ -112,9 +112,99 @@ export default function Auth({ onLogin }) {
   const [newPwd, setNewPwd] = useState('');
   const [newConf, setNewConf] = useState('');
 
+  // Permissions Modal state
+  const [showPermissionsModal, setShowPermissionsModal] = useState(true);
+  const [locPermission, setLocPermission] = useState('prompt');
+  const [smsPermission, setSmsPermission] = useState('prompt');
+
+  useEffect(() => {
+    // Check if permission already granted
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(res => {
+        setLocPermission(res.state);
+      });
+      navigator.permissions.query({ name: 'notifications' }).then(res => {
+        setSmsPermission(res.state);
+      });
+    }
+  }, []);
+
   useEffect(() => () => clearInterval(timerRef.current), []);
 
   function go(s) { setScreen(s); setError(''); setSuccess(''); }
+
+  // Requests browser location and auto-detects the closest state/district
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    setLocPermission('requesting');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocPermission('granted');
+        
+        // Find nearest district from coordinates map
+        let nearestState = 'Telangana';
+        let nearestDistrict = 'Hyderabad';
+        let minDist = Infinity;
+        
+        const COORDS = {
+          'Telangana': { Hyderabad: { lat: 17.385, lng: 78.4867 }, Warangal: { lat: 17.978, lng: 79.5941 } },
+          'Andhra Pradesh': { Visakhapatnam: { lat: 17.6868, lng: 83.2185 }, Vijayawada: { lat: 16.5062, lng: 80.6480 } },
+          'Maharashtra': { Mumbai: { lat: 19.076, lng: 72.8777 }, Pune: { lat: 18.5204, lng: 73.8567 } },
+          'Karnataka': { 'Bengaluru Urban': { lat: 12.9716, lng: 77.5946 } },
+          'Tamil Nadu': { Chennai: { lat: 13.0827, lng: 80.2707 }, Coimbatore: { lat: 11.0168, lng: 76.9558 } },
+          'Uttar Pradesh': { Lucknow: { lat: 26.8467, lng: 80.9462 } },
+          'Punjab': { Ludhiana: { lat: 30.9010, lng: 75.8573 } },
+          'Gujarat': { Ahmedabad: { lat: 23.0225, lng: 72.5714 } },
+          'Rajasthan': { Jaipur: { lat: 26.9124, lng: 75.7873 } },
+          'Madhya Pradesh': { Bhopal: { lat: 23.2599, lng: 77.4126 } },
+          'West Bengal': { Kolkata: { lat: 22.5726, lng: 88.3639 } },
+          'Bihar': { Patna: { lat: 25.6093, lng: 85.1376 } },
+          'Odisha': { Bhubaneswar: { lat: 20.2961, lng: 85.8245 } },
+          'Kerala': { Thiruvananthapuram: { lat: 8.5241, lng: 76.9366 } },
+          'Haryana': { Gurugram: { lat: 28.4595, lng: 77.0266 } },
+        };
+
+        Object.entries(COORDS).forEach(([st, dists]) => {
+          Object.entries(dists).forEach(([dist, coord]) => {
+            const d = Math.pow(coord.lat - latitude, 2) + Math.pow(coord.lng - longitude, 2);
+            if (d < minDist) {
+              minDist = d;
+              nearestState = st;
+              nearestDistrict = dist;
+            }
+          });
+        });
+
+        setSuState(nearestState);
+        // Save detected location in session storage to pass to App
+        sessionStorage.setItem('detected_state', nearestState);
+        sessionStorage.setItem('detected_district', nearestDistrict);
+      },
+      () => {
+        setLocPermission('denied');
+      }
+    );
+  };
+
+  // Request SMS alerts and Notification access
+  const requestSMSNotification = async () => {
+    setSmsPermission('requesting');
+    try {
+      // Notification permission request
+      if ('Notification' in window) {
+        const permission = await Notification.requestPermission();
+        setSmsPermission(permission);
+      } else {
+        setSmsPermission('granted'); // WebOTP fallback
+      }
+    } catch {
+      setSmsPermission('denied');
+    }
+  };
 
   function startTimer() {
     setTimer(60);
@@ -639,6 +729,83 @@ export default function Auth({ onLogin }) {
         <div id="recaptcha-container"></div>
         <p className="auth-footer">© 2026 Smart Crop Advisor AI · Made with ❤️ for Indian Farmers</p>
       </div>
+
+      {/* Permissions Request Modal Overlay */}
+      {showPermissionsModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 10000, padding: '1rem', backdropFilter: 'blur(8px)'
+        }}>
+          <div style={{
+            background: '#1a1a1a', border: '1px solid #333',
+            borderRadius: 16, padding: '2rem', maxWidth: 460, width: '100%',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)', display: 'flex',
+            flexDirection: 'column', gap: '1.25rem'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ fontSize: '2.5rem' }}>⚙️</span>
+              <h3 style={{ fontSize: '1.25rem', color: '#fff', marginTop: '0.5rem', fontWeight: 800 }}>Permissions Access Required</h3>
+              <p style={{ fontSize: '0.82rem', color: '#888', marginTop: '0.25rem' }}>
+                We need these permissions to configure your workspace for agricultural monitoring.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {/* Geolocation permission */}
+              <div style={{
+                background: '#222', border: '1px solid #333', borderRadius: 10,
+                padding: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>📍</span>
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f1f1f1' }}>Location Geolocation</div>
+                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Detects your district/mandal for weather</div>
+                  </div>
+                </div>
+                {locPermission === 'granted' ? (
+                  <span style={{ color: '#22c55e', fontSize: '0.85rem', fontWeight: 700 }}>✅ Allowed</span>
+                ) : locPermission === 'requesting' ? (
+                  <span style={{ color: '#fbbf24', fontSize: '0.85rem' }}>Requesting...</span>
+                ) : (
+                  <button type="button" onClick={requestLocation} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
+                    Allow
+                  </button>
+                )}
+              </div>
+
+              {/* Notification / SMS permission */}
+              <div style={{
+                background: '#222', border: '1px solid #333', borderRadius: 10,
+                padding: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontSize: '1.5rem' }}>💬</span>
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f1f1f1' }}>SMS Alerts & Notify</div>
+                    <div style={{ fontSize: '0.7rem', color: '#888' }}>Receive daily rate warnings & OTP autofill</div>
+                  </div>
+                </div>
+                {smsPermission === 'granted' ? (
+                  <span style={{ color: '#22c55e', fontSize: '0.85rem', fontWeight: 700 }}>✅ Allowed</span>
+                ) : smsPermission === 'requesting' ? (
+                  <span style={{ color: '#fbbf24', fontSize: '0.85rem' }}>Requesting...</span>
+                ) : (
+                  <button type="button" onClick={requestSMSNotification} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>
+                    Allow
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <button type="button" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}
+              onClick={() => setShowPermissionsModal(false)}>
+              Continue to Login / Sign In
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
