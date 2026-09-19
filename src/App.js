@@ -9,6 +9,7 @@ import {
   WEATHER_DATA, GOVT_SCHEMES, MCX_COMMODITIES, FUEL_BASE_PRICES
 } from './data';
 import { fetchLiveWeather } from './weatherService';
+import { I18N, calculateWeatherDecisions, PLANT_DISEASES_DB, generateCropRecommendations } from './agronomyEngine';
 
 /* ══════════════════════════════════════════════════════════
    SMART CROP ADVISOR AI — PROFESSIONAL FARMING ECOSYSTEM
@@ -43,67 +44,123 @@ const STARTER_LISTINGS = [
   // 🥬 Vegetables
   {
     id: "veg_spinach",
-    title: "Fresh Farm Organic Spinach (Palak)",
+    title: "Fresh Organic Spinach (Palak)",
     category: "🥬 Vegetables",
-    price: 18,
-    quantity: 150,
-    unit: "kg",
-    description: "Freshly harvested nutrient-rich green spinach leaves. 100% organic without chemical sprays.",
-    sellerId: "green_farm_1",
-    sellerName: "Ramesh Organic Farms",
-    sellerPhone: "9876543210",
+    price: 18, mrp: 25,
+    quantity: 150, unit: "kg",
+    description: "Freshly harvested organic spinach leaves. 100% chemical spray free.",
+    sellerId: "green_farm_1", sellerName: "Ramesh Organic Farms", sellerPhone: "9876543210",
     sellerLocation: { state: "Telangana", district: "Hyderabad", mandal: "Secunderabad" },
-    rating: 4.9,
-    ratingCount: 24,
+    rating: 4.9, ratingCount: 24,
     image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=500&auto=format&fit=crop&q=80"
   },
   {
     id: "veg_tomato",
-    title: "Red Farm-Fresh Hybrid Tomatoes",
+    title: "Red Hybrid Farm-Fresh Tomatoes",
     category: "🥬 Vegetables",
-    price: 22,
-    quantity: 500,
-    unit: "kg",
-    description: "Juicy, firm red tomatoes suitable for long transport and market sales.",
-    sellerId: "kisan_agro_2",
-    sellerName: "Venkateswara Agri Farms",
-    sellerPhone: "9440123456",
+    price: 22, mrp: 30,
+    quantity: 500, unit: "kg",
+    description: "Juicy, firm red tomatoes suitable for kitchen cooking and salads.",
+    sellerId: "kisan_agro_2", sellerName: "Venkateswara Agri Farms", sellerPhone: "9440123456",
     sellerLocation: { state: "Andhra Pradesh", district: "Guntur", mandal: "Tenali" },
-    rating: 4.8,
-    ratingCount: 38,
+    rating: 4.8, ratingCount: 38,
     image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&auto=format&fit=crop&q=80"
   },
   {
     id: "veg_onion",
     title: "Premium Red Nasik Onions",
     category: "🥬 Vegetables",
-    price: 28,
-    quantity: 1000,
-    unit: "kg",
+    price: 28, mrp: 38,
+    quantity: 1000, unit: "kg",
     description: "High-grade dry red onions with long shelf life and rich flavor.",
-    sellerId: "nashik_farms",
-    sellerName: "Patil Farmer Producer Co.",
-    sellerPhone: "9822012345",
+    sellerId: "nashik_farms", sellerName: "Patil Farmer Producer Co.", sellerPhone: "9822012345",
     sellerLocation: { state: "Maharashtra", district: "Nashik", mandal: "Malegaon" },
-    rating: 4.7,
-    ratingCount: 42,
+    rating: 4.7, ratingCount: 42,
     image: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cf?w=500&auto=format&fit=crop&q=80"
   },
   {
     id: "veg_potato",
     title: "Fresh Harvest Potato (Jyoti Grade A)",
     category: "🥬 Vegetables",
-    price: 20,
-    quantity: 800,
-    unit: "kg",
-    description: "Clean, dirt-free large potatoes ideal for cooking and wholesale distribution.",
-    sellerId: "up_potatoes",
-    sellerName: "Agra Wholesale Farmers",
-    sellerPhone: "9711098765",
+    price: 20, mrp: 28,
+    quantity: 800, unit: "kg",
+    description: "Clean, dirt-free large potatoes ideal for cooking and frying.",
+    sellerId: "up_potatoes", sellerName: "Agra Wholesale Farmers", sellerPhone: "9711098765",
     sellerLocation: { state: "Uttar Pradesh", district: "Agra", mandal: "Etmadpur" },
-    rating: 4.6,
-    ratingCount: 19,
+    rating: 4.6, ratingCount: 19,
     image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "veg_carrot",
+    title: "Organic Red Carrots (Gajar)",
+    category: "🥬 Vegetables",
+    price: 28, mrp: 40,
+    quantity: 300, unit: "kg",
+    description: "Sweet, crunchy carrots rich in Vitamin A. Perfect for salads and juices.",
+    sellerId: "carrot_hp", sellerName: "Himachal Valley Growers", sellerPhone: "9816012345",
+    sellerLocation: { state: "Himachal Pradesh", district: "Shimla", mandal: "Rohru" },
+    rating: 4.8, ratingCount: 26,
+    image: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "veg_cauliflower",
+    title: "White Snowball Cauliflower (Gobi)",
+    category: "🥬 Vegetables",
+    price: 25, mrp: 35,
+    quantity: 400, unit: "kg",
+    description: "Firm, crisp white cauliflower heads straight from farm fields.",
+    sellerId: "pb_gobi", sellerName: "Ludhiana Vegetable Growers", sellerPhone: "9815012345",
+    sellerLocation: { state: "Punjab", district: "Ludhiana", mandal: "Jagraon" },
+    rating: 4.6, ratingCount: 17,
+    image: "https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "veg_okra",
+    title: "Tender Green Okra / Lady Finger (Bhindi)",
+    category: "🥬 Vegetables",
+    price: 32, mrp: 45,
+    quantity: 250, unit: "kg",
+    description: "Young, non-fibrous okra pods suitable for daily frying and curries.",
+    sellerId: "bhindi_tn", sellerName: "Coimbatore Agri Farms", sellerPhone: "9843012345",
+    sellerLocation: { state: "Tamil Nadu", district: "Coimbatore", mandal: "Pollachi" },
+    rating: 4.7, ratingCount: 29,
+    image: "https://images.unsplash.com/photo-1627735483748-bc5bfd1f0e68?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "veg_garlic",
+    title: "Desi Whole Garlic Bulbs (Lahsun)",
+    category: "🥬 Vegetables",
+    price: 120, mrp: 160,
+    quantity: 500, unit: "kg",
+    description: "Pungent, aromatic desi garlic bulbs with tight cloves and long shelf life.",
+    sellerId: "garlic_mp", sellerName: "Madhya Pradesh Spice Growers", sellerPhone: "9827012345",
+    sellerLocation: { state: "Madhya Pradesh", district: "Mandsaur", mandal: "Sitamau" },
+    rating: 4.8, ratingCount: 35,
+    image: "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "veg_ginger",
+    title: "Fresh Spicy Ginger Root (Adrak)",
+    category: "🥬 Vegetables",
+    price: 80, mrp: 110,
+    quantity: 300, unit: "kg",
+    description: "Fresh washed ginger with bold heat and rich gingerol oils.",
+    sellerId: "ginger_ker", sellerName: "Kerala Spice Growers", sellerPhone: "9447112345",
+    sellerLocation: { state: "Kerala", district: "Idukki", mandal: "Thodupuzha" },
+    rating: 4.9, ratingCount: 44,
+    image: "https://images.unsplash.com/photo-1573401015249-000df68ff7ca?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "veg_capsicum",
+    title: "Green Crisp Capsicum (Shimla Mirch)",
+    category: "🥬 Vegetables",
+    price: 45, mrp: 60,
+    quantity: 200, unit: "kg",
+    description: "Glossy bell peppers for stir fries, curries, and daily kitchen use.",
+    sellerId: "bell_pepper_tn", sellerName: "Ooty Hillfresh Produce", sellerPhone: "9842112345",
+    sellerLocation: { state: "Tamil Nadu", district: "Nilgiris", mandal: "Ooty" },
+    rating: 4.7, ratingCount: 22,
+    image: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=500&auto=format&fit=crop&q=80"
   },
 
   // 🍎 Fruits
@@ -111,133 +168,235 @@ const STARTER_LISTINGS = [
     id: "fruit_mango",
     title: "Sweet Alphonso Mangoes (Ratnagiri)",
     category: "🍎 Fruits",
-    price: 120,
-    quantity: 200,
-    unit: "kg",
+    price: 120, mrp: 160,
+    quantity: 200, unit: "kg",
     description: "Naturally ripened GI-tagged Ratnagiri Alphonso mangoes with rich aroma.",
-    sellerId: "mango_king",
-    sellerName: "Kokan Agro Orchards",
-    sellerPhone: "9823456789",
-    sellerLocation: { state: "Maharashtra", district: "Pune", mandal: "Haveli" },
-    rating: 5.0,
-    ratingCount: 56,
+    sellerId: "mango_king", sellerName: "Kokan Agro Orchards", sellerPhone: "9823456789",
+    sellerLocation: { state: "Maharashtra", district: "Ratnagiri", mandal: "Dapoli" },
+    rating: 5.0, ratingCount: 56,
     image: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=500&auto=format&fit=crop&q=80"
   },
   {
     id: "fruit_banana",
-    title: "Organic Robusta Bananas",
+    title: "Organic Robusta Bananas (Kela)",
     category: "🍎 Fruits",
-    price: 28,
-    quantity: 350,
-    unit: "kg",
-    description: "Sweet, nutrient-dense green-ripened robusta bananas.",
-    sellerId: "kerala_fruits",
-    sellerName: "Malabar Fruit Producers",
-    sellerPhone: "9447012345",
+    price: 28, mrp: 40,
+    quantity: 350, unit: "kg",
+    description: "Sweet, potassium-dense naturally ripened robusta bananas.",
+    sellerId: "kerala_fruits", sellerName: "Malabar Fruit Producers", sellerPhone: "9447012345",
     sellerLocation: { state: "Kerala", district: "Palakkad", mandal: "Ottappalam" },
-    rating: 4.8,
-    ratingCount: 31,
+    rating: 4.8, ratingCount: 31,
     image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=80"
   },
   {
     id: "fruit_grapes",
-    title: "Export Quality Seedless Green Grapes",
+    title: "Export Seedless Green Grapes (Angoor)",
     category: "🍎 Fruits",
-    price: 80,
-    quantity: 250,
-    unit: "kg",
-    description: "Crisp, sweet Thomson seedless green grapes directly from vineyards.",
-    sellerId: "grapes_nashik",
-    sellerName: "Sahyadri Farmers Producer Co.",
-    sellerPhone: "9822334455",
+    price: 80, mrp: 110,
+    quantity: 250, unit: "kg",
+    description: "Crisp, sweet Thomson seedless green grapes from Nashik vineyards.",
+    sellerId: "grapes_nashik", sellerName: "Sahyadri Farmers Producer Co.", sellerPhone: "9822334455",
     sellerLocation: { state: "Maharashtra", district: "Nashik", mandal: "Dindori" },
-    rating: 4.9,
-    ratingCount: 29,
+    rating: 4.9, ratingCount: 29,
     image: "https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=500&auto=format&fit=crop&q=80"
   },
+  {
+    id: "fruit_apple",
+    title: "Royal Delicious Kashmiri Apples (Seb)",
+    category: "🍎 Fruits",
+    price: 150, mrp: 200,
+    quantity: 200, unit: "kg",
+    description: "Crisp, sweet-tangy Kashmiri mountain apples picked at peak maturity.",
+    sellerId: "apple_kash", sellerName: "J&K Horticulture Board", sellerPhone: "9906312345",
+    sellerLocation: { state: "Jammu & Kashmir", district: "Shopian", mandal: "Keller" },
+    rating: 4.9, ratingCount: 52,
+    image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "fruit_pomegranate",
+    title: "Ruby Red Bhagwa Pomegranate (Anar)",
+    category: "🍎 Fruits",
+    price: 90, mrp: 130,
+    quantity: 300, unit: "kg",
+    description: "Sweet juicy arils with soft seeds, high antioxidant content.",
+    sellerId: "anar_solapur", sellerName: "Solapur Pomegranate Growers", sellerPhone: "9822556677",
+    sellerLocation: { state: "Maharashtra", district: "Solapur", mandal: "Mangalvedhe" },
+    rating: 4.9, ratingCount: 37,
+    image: "https://images.unsplash.com/photo-1541344999736-83eca272f6fc?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "fruit_lemon",
+    title: "Juicy Kagzi Lemons (Nimbu Pack)",
+    category: "🍎 Fruits",
+    price: 60, mrp: 80,
+    quantity: 350, unit: "kg",
+    description: "Thin-skinned acidic juicy lemons essential for everyday cooking and drinks.",
+    sellerId: "lemon_ap", sellerName: "Coastal Citrus Farms", sellerPhone: "9440712345",
+    sellerLocation: { state: "Andhra Pradesh", district: "Nellore", mandal: "Kavali" },
+    rating: 4.7, ratingCount: 31,
+    image: "https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=500&auto=format&fit=crop&q=80"
+  },
 
-  // 🌾 Grains & Seeds
+  // 🌾 Grains & Flour
   {
     id: "grain_basmati",
     title: "1121 Premium Long-Grain Basmati Rice",
-    category: "🌾 Grains & Seeds",
-    price: 95,
-    quantity: 500,
-    unit: "kg",
+    category: "🌾 Grains & Flour",
+    price: 95, mrp: 130,
+    quantity: 500, unit: "kg",
     description: "Aromatic extra-long grain basmati rice, aged 12 months for fluffiness.",
-    sellerId: "punjab_rice",
-    sellerName: "Golden Field Millers",
-    sellerPhone: "9814012345",
+    sellerId: "punjab_rice", sellerName: "Golden Field Millers", sellerPhone: "9814012345",
     sellerLocation: { state: "Punjab", district: "Amritsar", mandal: "Ajnala" },
-    rating: 5.0,
-    ratingCount: 47,
+    rating: 5.0, ratingCount: 47,
     image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&auto=format&fit=crop&q=80"
   },
   {
-    id: "grain_wheat",
-    title: "Sharbati Gold Wheat (MP Special)",
-    category: "🌾 Grains & Seeds",
-    price: 32,
-    quantity: 1200,
-    unit: "kg",
-    description: "Lustrous heavy grain Sharbati wheat, famous for soft rotis.",
-    sellerId: "mp_grains",
-    sellerName: "Narmada Valley Farmers",
-    sellerPhone: "9826012345",
-    sellerLocation: { state: "Madhya Pradesh", district: "Indore", mandal: "Sanwer" },
-    rating: 4.8,
-    ratingCount: 35,
-    image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&auto=format&fit=crop&q=80"
+    id: "grain_sona_masuri",
+    title: "Sona Masuri Raw Rice (Everyday Rice)",
+    category: "🌾 Grains & Flour",
+    price: 55, mrp: 70,
+    quantity: 1000, unit: "kg",
+    description: "Lightweight, aromatic daily staple rice from the Godavari basin.",
+    sellerId: "ap_rice", sellerName: "Godavari Rice Mills", sellerPhone: "9441234567",
+    sellerLocation: { state: "Andhra Pradesh", district: "West Godavari", mandal: "Tanuku" },
+    rating: 4.8, ratingCount: 63,
+    image: "https://images.unsplash.com/photo-1536304929831-ee1ca9d44906?w=500&auto=format&fit=crop&q=80"
   },
   {
-    id: "seed_1",
-    title: "Premium Hybrid Tomato Seeds",
-    category: "🌾 Grains & Seeds",
-    price: 150,
-    quantity: 50,
-    unit: "pkt",
-    description: "High-yield, disease-resistant tomato seeds. Perfect for Kharif and Rabi seasons.",
-    sellerId: "seed_corp",
-    sellerName: "Krishna Seed Biotech",
-    sellerPhone: "9848022338",
-    sellerLocation: { state: "Telangana", district: "Hyderabad", mandal: "Secunderabad" },
-    rating: 4.8,
-    ratingCount: 12,
-    image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=500&auto=format&fit=crop&q=80"
+    id: "grain_atta",
+    title: "Stone-Ground Whole Wheat Chakki Atta",
+    category: "🌾 Grains & Flour",
+    price: 42, mrp: 55,
+    quantity: 800, unit: "kg",
+    description: "100% whole wheat chakki-fresh flour retaining all natural fibre and bran.",
+    sellerId: "chakki_atta", sellerName: "Organic Chakki Mills", sellerPhone: "9812012345",
+    sellerLocation: { state: "Haryana", district: "Rohtak", mandal: "Kalanaur" },
+    rating: 4.9, ratingCount: 58,
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "grain_poha",
+    title: "Thick Flattened Rice (Poha / Aval)",
+    category: "🌾 Grains & Flour",
+    price: 65, mrp: 85,
+    quantity: 300, unit: "kg",
+    description: "Traditional thick beaten rice flakes. Quick and healthy breakfast cereal.",
+    sellerId: "poha_mp", sellerName: "Nimar Valley Rice Mills", sellerPhone: "9827312345",
+    sellerLocation: { state: "Madhya Pradesh", district: "Khandwa", mandal: "Punasa" },
+    rating: 4.7, ratingCount: 27,
+    image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "grain_besan",
+    title: "Pure Chana Dal Besan (Gram Flour)",
+    category: "🌾 Grains & Flour",
+    price: 75, mrp: 95,
+    quantity: 400, unit: "kg",
+    description: "Finely milled yellow gram flour for snacks, kadhi, sweets, and rotis.",
+    sellerId: "besan_raj", sellerName: "Rajasthan Gram Processors", sellerPhone: "9828112345",
+    sellerLocation: { state: "Rajasthan", district: "Bikaner", mandal: "Nokha" },
+    rating: 4.8, ratingCount: 33,
+    image: "https://images.unsplash.com/photo-1627735483748-bc5bfd1f0e68?w=500&auto=format&fit=crop&q=80"
   },
 
-  // 🫘 Pulses & Spices
+  // 🫘 Pulses & Dal
   {
     id: "pulse_toor",
-    title: "Organic Desi Toor Dal (Arhar)",
-    category: "🫘 Pulses & Spices",
-    price: 140,
-    quantity: 400,
-    unit: "kg",
-    description: "Unpolished natural Toor Dal high in protein and free from synthetic dyes.",
-    sellerId: "gulbarga_dal",
-    sellerName: "Deccan Pulses Co.",
-    sellerPhone: "9845012345",
+    title: "Unpolished Organic Toor Dal (Arhar)",
+    category: "🫘 Pulses & Dal",
+    price: 140, mrp: 180,
+    quantity: 400, unit: "kg",
+    description: "Protein-rich desi toor dal without oil or synthetic dye polishing.",
+    sellerId: "gulbarga_dal", sellerName: "Deccan Pulses Co.", sellerPhone: "9845012345",
     sellerLocation: { state: "Karnataka", district: "Kalaburagi", mandal: "Kalaburagi City" },
-    rating: 4.9,
-    ratingCount: 22,
+    rating: 4.9, ratingCount: 22,
     image: "https://images.unsplash.com/photo-1585994191611-72ec0b73c41e?w=500&auto=format&fit=crop&q=80"
   },
   {
+    id: "pulse_moong",
+    title: "Split Yellow Moong Dal",
+    category: "🫘 Pulses & Dal",
+    price: 120, mrp: 155,
+    quantity: 350, unit: "kg",
+    description: "Light and easily digestible yellow split lentils for khichdi and dal tadka.",
+    sellerId: "moong_raj", sellerName: "Barmer Pulse Growers", sellerPhone: "9829012345",
+    sellerLocation: { state: "Rajasthan", district: "Barmer", mandal: "Balotra" },
+    rating: 4.8, ratingCount: 31,
+    image: "https://images.unsplash.com/photo-1599579776378-5aa72f1a0c8c?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "pulse_chana",
+    title: "Desi Brown Chana (Kala Chana)",
+    category: "🫘 Pulses & Dal",
+    price: 90, mrp: 120,
+    quantity: 600, unit: "kg",
+    description: "High-protein unpolished desi chickpeas for curries, boiling, and sprouting.",
+    sellerId: "chana_up", sellerName: "Kanpur Agricultural Co-op", sellerPhone: "9839012345",
+    sellerLocation: { state: "Uttar Pradesh", district: "Kanpur", mandal: "Bilhaur" },
+    rating: 4.6, ratingCount: 16,
+    image: "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "pulse_rajma",
+    title: "Chitra Red Kidney Beans (Rajma)",
+    category: "🫘 Pulses & Dal",
+    price: 160, mrp: 200,
+    quantity: 200, unit: "kg",
+    description: "Creamy-cooking Himalayan Chitra rajma beans, rich in plant protein.",
+    sellerId: "rajma_jk", sellerName: "J&K Valley Beans Growers", sellerPhone: "9906412345",
+    sellerLocation: { state: "Jammu & Kashmir", district: "Jammu", mandal: "Akhnoor" },
+    rating: 4.9, ratingCount: 43,
+    image: "https://images.unsplash.com/photo-1551360934-39d45c0eda44?w=500&auto=format&fit=crop&q=80"
+  },
+
+  // 🌶 Spices & Masala
+  {
     id: "spice_turmeric",
-    title: "High-Curcumin Salem Turmeric Powder/Fingers",
-    category: "🫘 Pulses & Spices",
-    price: 160,
-    quantity: 300,
-    unit: "kg",
-    description: "Bright yellow aromatic turmeric with 5%+ curcumin content.",
-    sellerId: "salem_spices",
-    sellerName: "Kongu Spices & Herbs",
-    sellerPhone: "9842012345",
+    title: "Salem Golden Turmeric Powder (5% Curcumin)",
+    category: "🌶 Spices & Masala",
+    price: 160, mrp: 210,
+    quantity: 300, unit: "kg",
+    description: "High-potency aromatic natural turmeric with therapeutic curcumin.",
+    sellerId: "salem_spices", sellerName: "Kongu Spices & Herbs", sellerPhone: "9842012345",
     sellerLocation: { state: "Tamil Nadu", district: "Salem", mandal: "Attur" },
-    rating: 5.0,
-    ratingCount: 40,
+    rating: 5.0, ratingCount: 40,
     image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "spice_chilli",
+    title: "Guntur Stemless Red Chilli (Mirchi)",
+    category: "🌶 Spices & Masala",
+    price: 200, mrp: 260,
+    quantity: 250, unit: "kg",
+    description: "Intense color and spicy heat. Famous hot variety from Guntur markets.",
+    sellerId: "chilli_ap", sellerName: "Guntur Chilli Traders", sellerPhone: "9440812345",
+    sellerLocation: { state: "Andhra Pradesh", district: "Guntur", mandal: "Ongole" },
+    rating: 4.9, ratingCount: 48,
+    image: "https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "spice_cumin",
+    title: "Whole Cumin Seeds (Jeera)",
+    category: "🌶 Spices & Masala",
+    price: 320, mrp: 420,
+    quantity: 200, unit: "kg",
+    description: "Aromatic bold whole cumin seeds, cleaned and sorted for everyday tadka.",
+    sellerId: "jeera_raj", sellerName: "Jodhpur Spice Farmers", sellerPhone: "9829112345",
+    sellerLocation: { state: "Rajasthan", district: "Jodhpur", mandal: "Tinwari" },
+    rating: 4.9, ratingCount: 36,
+    image: "https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "spice_pepper",
+    title: "Wayanad Black Pepper (Kali Mirch)",
+    category: "🌶 Spices & Masala",
+    price: 650, mrp: 850,
+    quantity: 100, unit: "kg",
+    description: "Single-origin whole black peppercorns with sharp fragrance and pungency.",
+    sellerId: "pepper_ker", sellerName: "Wayanad Spice Planters", sellerPhone: "9447212345",
+    sellerLocation: { state: "Kerala", district: "Wayanad", mandal: "Mananthavady" },
+    rating: 5.0, ratingCount: 55,
+    image: "https://images.unsplash.com/photo-1594568284297-7c64464062b4?w=500&auto=format&fit=crop&q=80"
   },
 
   // 🥜 Dry Fruits & Nuts
@@ -245,103 +404,241 @@ const STARTER_LISTINGS = [
     id: "dry_almond",
     title: "Raw California Almonds (Badam)",
     category: "🥜 Dry Fruits & Nuts",
-    price: 750,
-    quantity: 150,
-    unit: "kg",
-    description: "Crunchy, sweet, jumbo size California almonds packed with Vitamin E.",
-    sellerId: "kashmir_dry",
-    sellerName: "Himalayan Dry Fruits",
-    sellerPhone: "9906012345",
+    price: 750, mrp: 950,
+    quantity: 150, unit: "kg",
+    description: "Crunchy sweet jumbo almonds rich in Vitamin E and brain nutrients.",
+    sellerId: "kashmir_dry", sellerName: "Himalayan Dry Fruits", sellerPhone: "9906012345",
     sellerLocation: { state: "Uttarakhand", district: "Dehradun", mandal: "Rishikesh" },
-    rating: 4.9,
-    ratingCount: 33,
+    rating: 4.9, ratingCount: 33,
     image: "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=500&auto=format&fit=crop&q=80"
   },
   {
     id: "dry_cashew",
     title: "Whole W240 Jumbo Cashews (Kaju)",
     category: "🥜 Dry Fruits & Nuts",
-    price: 900,
-    quantity: 100,
-    unit: "kg",
-    description: "Export-grade unblemished whole cashew nuts from Mangaluru coastal farms.",
-    sellerId: "cashew_coast",
-    sellerName: "Mangalore Cashew Exports",
-    sellerPhone: "9845912345",
+    price: 900, mrp: 1150,
+    quantity: 100, unit: "kg",
+    description: "Export grade unblemished whole cashew nuts from Mangaluru coastal farms.",
+    sellerId: "cashew_coast", sellerName: "Mangalore Cashew Exports", sellerPhone: "9845912345",
     sellerLocation: { state: "Karnataka", district: "Mangaluru", mandal: "Puttur" },
-    rating: 5.0,
-    ratingCount: 45,
+    rating: 5.0, ratingCount: 45,
     image: "https://images.unsplash.com/photo-1599599810694-b5b37304c041?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "dry_foxnuts",
+    title: "Bihar Phool Makhana (Fox Nuts)",
+    category: "🥜 Dry Fruits & Nuts",
+    price: 700, mrp: 900,
+    quantity: 100, unit: "kg",
+    description: "Jumbo popped lotus seeds, roasted superfood with zero cholesterol.",
+    sellerId: "makhana_bihar", sellerName: "Darbhanga Makhana Co.", sellerPhone: "9835012345",
+    sellerLocation: { state: "Bihar", district: "Darbhanga", mandal: "Singhwara" },
+    rating: 4.9, ratingCount: 46,
+    image: "https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=500&auto=format&fit=crop&q=80"
   },
 
   // 🥛 Dairy & Oils
   {
     id: "dairy_ghee",
-    title: "Pure A2 Desi Cow Bilona Ghee",
+    title: "A2 Desi Cow Bilona Ghee (Gir Cow)",
     category: "🥛 Dairy & Oils",
-    price: 1100,
-    quantity: 80,
-    unit: "litre",
-    description: "Traditional hand-churned Bilona method Ghee from Gir cow milk.",
-    sellerId: "gir_dairy",
-    sellerName: "Krishna Gaushala Organics",
-    sellerPhone: "9825012345",
-    sellerLocation: { state: "Gujarat", district: "Ahmedabad", mandal: "Sanand" },
-    rating: 5.0,
-    ratingCount: 62,
+    price: 1100, mrp: 1400,
+    quantity: 80, unit: "litre",
+    description: "Traditional hand-churned Vedic Bilona method ghee from grass-fed cows.",
+    sellerId: "gir_dairy", sellerName: "Krishna Gaushala Organics", sellerPhone: "9825012345",
+    sellerLocation: { state: "Gujarat", district: "Junagadh", mandal: "Sanand" },
+    rating: 5.0, ratingCount: 62,
     image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "dairy_honey",
+    title: "Raw Multifloral Forest Honey",
+    category: "🥛 Dairy & Oils",
+    price: 450, mrp: 600,
+    quantity: 150, unit: "kg",
+    description: "Unfiltered natural honey containing pollen, enzymes, and antioxidants.",
+    sellerId: "honey_uttara", sellerName: "Kumaon Forest Beekeepers", sellerPhone: "9917012345",
+    sellerLocation: { state: "Uttarakhand", district: "Nainital", mandal: "Ramnagar" },
+    rating: 5.0, ratingCount: 71,
+    image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "dairy_mustard_oil",
+    title: "Cold-Pressed Kachi Ghani Mustard Oil",
+    category: "🥛 Dairy & Oils",
+    price: 180, mrp: 230,
+    quantity: 300, unit: "litre",
+    description: "Pungent traditional cold-press oil for cooking, pickles, and massage.",
+    sellerId: "mustard_hr", sellerName: "Haryana Oilseed Mills", sellerPhone: "9812112345",
+    sellerLocation: { state: "Haryana", district: "Rewari", mandal: "Kosli" },
+    rating: 4.8, ratingCount: 39,
+    image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&auto=format&fit=crop&q=80"
+  },
+
+  // 🧴 Daily Routine
+  {
+    id: "daily_jaggery",
+    title: "Organic Sugarcane Jaggery (Gud Cubes)",
+    category: "🧴 Daily Routine",
+    price: 60, mrp: 80,
+    quantity: 500, unit: "kg",
+    description: "Chemical-free unrefined natural jaggery rich in iron and minerals.",
+    sellerId: "jaggery_maha", sellerName: "Kolhapur Jaggery Farmers", sellerPhone: "9822712345",
+    sellerLocation: { state: "Maharashtra", district: "Kolhapur", mandal: "Shirol" },
+    rating: 4.9, ratingCount: 52,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "daily_tea",
+    title: "Assam CTC Kadak Chai Leaves",
+    category: "🧴 Daily Routine",
+    price: 250, mrp: 320,
+    quantity: 300, unit: "kg",
+    description: "Strong malty CTC tea blend giving deep liquor and rich tea aroma.",
+    sellerId: "tea_assam", sellerName: "Dibrugarh Tea Gardens", sellerPhone: "9435012345",
+    sellerLocation: { state: "Assam", district: "Dibrugarh", mandal: "Moran" },
+    rating: 4.9, ratingCount: 67,
+    image: "https://images.unsplash.com/photo-1564890369478-c89ca3d9cde4?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "daily_salt",
+    title: "Himalayan Pink Rock Salt (Sendha Namak)",
+    category: "🧴 Daily Routine",
+    price: 35, mrp: 50,
+    quantity: 1000, unit: "kg",
+    description: "Unrefined pink crystal rock salt rich in 84 natural trace minerals.",
+    sellerId: "salt_pk", sellerName: "Himalayan Mineral Works", sellerPhone: "9881012345",
+    sellerLocation: { state: "Uttarakhand", district: "Haridwar", mandal: "Jwalapur" },
+    rating: 4.8, ratingCount: 45,
+    image: "https://images.unsplash.com/photo-1562547256-2c5ee93b60b7?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "daily_soap",
+    title: "Ayurvedic Neem & Tulsi Herbal Bath Soap",
+    category: "🧴 Daily Routine",
+    price: 45, mrp: 65,
+    quantity: 500, unit: "pcs",
+    description: "Gentle handmade cold-process soap with pure antibacterial neem extract.",
+    sellerId: "soap_goa", sellerName: "Goa Natural Organics", sellerPhone: "9821012345",
+    sellerLocation: { state: "Goa", district: "North Goa", mandal: "Panaji" },
+    rating: 4.8, ratingCount: 38,
+    image: "https://images.unsplash.com/photo-1607006314597-9e76747b0a70?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "daily_coffee",
+    title: "Coorg Pure Plantation Coffee Powder",
+    category: "🧴 Daily Routine",
+    price: 380, mrp: 480,
+    quantity: 150, unit: "kg",
+    description: "Slow roasted 80:20 Arabica blend for authentic South Indian filter coffee.",
+    sellerId: "coffee_coorg", sellerName: "Kodagu Coffee Estates", sellerPhone: "9845312345",
+    sellerLocation: { state: "Karnataka", district: "Kodagu", mandal: "Madikeri" },
+    rating: 5.0, ratingCount: 44,
+    image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=500&auto=format&fit=crop&q=80"
+  },
+
+  // 🌱 Seeds
+  {
+    id: "seed_tomato",
+    title: "Abhinav F1 Hybrid Tomato Seeds (10g)",
+    category: "🌱 Seeds",
+    price: 150, mrp: 200,
+    quantity: 50, unit: "pkt",
+    description: "High-yield, disease-resistant tomato hybrid seeds for Kharif and Rabi.",
+    sellerId: "seed_corp", sellerName: "Krishna Seed Biotech", sellerPhone: "9848022338",
+    sellerLocation: { state: "Telangana", district: "Hyderabad", mandal: "Secunderabad" },
+    rating: 4.8, ratingCount: 12,
+    image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "seed_paddy",
+    title: "IR-64 Certified Paddy Hybrid Seeds (5kg)",
+    category: "🌱 Seeds",
+    price: 280, mrp: 360,
+    quantity: 200, unit: "bag",
+    description: "Short-duration certified seeds giving up to 55 quintals/acre yield.",
+    sellerId: "paddy_seed_ap", sellerName: "Sri Rama Seed House", sellerPhone: "9441812345",
+    sellerLocation: { state: "Andhra Pradesh", district: "West Godavari", mandal: "Bhimavaram" },
+    rating: 4.7, ratingCount: 22,
+    image: "https://images.unsplash.com/photo-1536304929831-ee1ca9d44906?w=500&auto=format&fit=crop&q=80"
   },
 
   // 🧪 Fertilizers & Agri
   {
-    id: "fert_1",
-    title: "Organic NPK Fertilizer (Gromore)",
+    id: "fert_npk",
+    title: "Organic Balanced NPK 19-19-19 (50kg Bag)",
     category: "🧪 Fertilizers & Agri",
-    price: 950,
-    quantity: 120,
-    unit: "bag",
-    description: "Rich organic fertilizer with NPK 19-19-19 ratio. Increases crop yield and soil health.",
-    sellerId: "agri_store",
-    sellerName: "Balaji Agro Chemicals",
-    sellerPhone: "9440123456",
+    price: 950, mrp: 1200,
+    quantity: 120, unit: "bag",
+    description: "Water-soluble balanced crop nutrient booster for rapid vegetative and fruit growth.",
+    sellerId: "agri_store", sellerName: "Balaji Agro Chemicals", sellerPhone: "9440123456",
     sellerLocation: { state: "Andhra Pradesh", district: "Guntur", mandal: "Tenali" },
-    rating: 4.5,
-    ratingCount: 8,
+    rating: 4.5, ratingCount: 8,
     image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=500&auto=format&fit=crop&q=80"
   },
   {
-    id: "pest_1",
-    title: "Pure Neem Oil Bio-Pesticide",
+    id: "fert_urea",
+    title: "Neem-Coated Urea Fertilizer (50kg)",
     category: "🧪 Fertilizers & Agri",
-    price: 350,
-    quantity: 80,
-    unit: "litre",
-    description: "100% cold-pressed neem oil. Highly effective natural pesticide for cotton and vegetable crops.",
-    sellerId: "eco_grow",
-    sellerName: "Green Earth Organics",
-    sellerPhone: "9123456789",
+    price: 280, mrp: 350,
+    quantity: 500, unit: "bag",
+    description: "Slow nitrogen release formulation reducing volatilization and soil acidification.",
+    sellerId: "urea_farmer", sellerName: "Krishak Agri Suppliers", sellerPhone: "9849112345",
+    sellerLocation: { state: "Telangana", district: "Karimnagar", mandal: "Jammikunta" },
+    rating: 4.6, ratingCount: 14,
+    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "pest_neemoil",
+    title: "Cold-Pressed Neem Bio-Pesticide (5L)",
+    category: "🧪 Fertilizers & Agri",
+    price: 350, mrp: 450,
+    quantity: 80, unit: "can",
+    description: "Natural organic pest control against whiteflies, aphids, and bollworms.",
+    sellerId: "eco_grow", sellerName: "Green Earth Organics", sellerPhone: "9123456789",
     sellerLocation: { state: "Maharashtra", district: "Nagpur", mandal: "Katol" },
-    rating: 4.6,
-    ratingCount: 15,
+    rating: 4.6, ratingCount: 15,
     image: "https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?w=500&auto=format&fit=crop&q=80"
+  },
+
+  // 💧 Irrigation
+  {
+    id: "irr_drip",
+    title: "Inline 16mm Drip Irrigation Tape (100m Roll)",
+    category: "💧 Irrigation",
+    price: 650, mrp: 850,
+    quantity: 200, unit: "roll",
+    description: "20cm emitter spacing inline tape delivering 2-4 LPH water directly to crop roots.",
+    sellerId: "drip_jain", sellerName: "Jain Irrigation Dealers", sellerPhone: "9825412345",
+    sellerLocation: { state: "Maharashtra", district: "Jalgaon", mandal: "Jalgaon City" },
+    rating: 4.7, ratingCount: 17,
+    image: "https://images.unsplash.com/photo-1519003300449-424ad0405076?w=500&auto=format&fit=crop&q=80"
   },
 
   // 🛠️ Farming Tools
   {
-    id: "tool_1",
-    title: "Heavy-Duty Hand Cultivator Tool",
+    id: "tool_cultivator",
+    title: "Heavy-Duty Ergonomic Hand Cultivator",
     category: "🛠️ Farming Tools",
-    price: 450,
-    quantity: 25,
-    unit: "pcs",
-    description: "Ergonomic rust-resistant carbon steel garden tool for weeding and soil loosening.",
-    sellerId: "tool_works",
-    sellerName: "Kisan Steel & Tools",
-    sellerPhone: "9876543210",
+    price: 450, mrp: 580,
+    quantity: 25, unit: "pcs",
+    description: "Tough carbon steel prongs for weed removal, aerating soil, and preparing seed beds.",
+    sellerId: "tool_works", sellerName: "Kisan Steel & Tools", sellerPhone: "9876543210",
     sellerLocation: { state: "Karnataka", district: "Bengaluru", mandal: "Whitefield" },
-    rating: 4.7,
-    ratingCount: 20,
+    rating: 4.7, ratingCount: 20,
     image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&auto=format&fit=crop&q=80"
+  },
+  {
+    id: "tool_sprayer",
+    title: "16L Rechargeable Battery Power Sprayer",
+    category: "🛠️ Farming Tools",
+    price: 3200, mrp: 4200,
+    quantity: 30, unit: "pcs",
+    description: "Backpack electric sprayer with brass lance and pressure regulator for agrochemicals.",
+    sellerId: "sprayer_ts", sellerName: "Kisan Machinery Stores", sellerPhone: "9440312345",
+    sellerLocation: { state: "Telangana", district: "Hyderabad", mandal: "Uppal" },
+    rating: 4.8, ratingCount: 25,
+    image: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=500&auto=format&fit=crop&q=80"
   }
 ];
 
@@ -379,14 +676,27 @@ export default function App() {
   const [alertSending,   setAlertSending]   = useState(false);
   const [alertSent,      setAlertSent]      = useState(false);
 
-  /* ── Crop advisor ─────────────────────────────────── */
-  const [cropInputs,    setCropInputs]    = useState({ soil:'Black', water:'Medium', season:'Kharif', area:'5' });
-  const [recommendation, setRecommendation] = useState(null);
+  /* ── Crop advisor (5-step farm setup) ─────────────── */
+  const [cropStep, setCropStep] = useState(1);
+  const [farmSetup, setFarmSetup] = useState({
+    farmSize: '5',
+    irrigation: 'Drip Irrigation',
+    prevCrop: 'Legumes / Pulses',
+    soilType: 'Black Cotton',
+    nitrogen: 75,
+    phosphorus: 35,
+    potassium: 45,
+    ph: 6.8,
+    season: 'Kharif',
+  });
+  const [cropRecommendations, setCropRecommendations] = useState(null);
+  const [selectedCropRank, setSelectedCropRank] = useState(0);
 
-  /* ── Leaf scanner ────────────────────────────────── */
-  const [scanTarget,  setScanTarget]   = useState('spot');
-  const [scanning,    setScanning]     = useState(false);
-  const [scanResult,  setScanResult]   = useState(null);
+  /* ── Plant Health Scanner ────────────────────────── */
+  const [scanCropType, setScanCropType] = useState('tomato_blight');
+  const [uploadedScanImage, setUploadedScanImage] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [diseaseReport, setDiseaseReport] = useState(null);
 
   /* ── Ledger ──────────────────────────────────────── */
   const [ledger,      setLedger]       = useState([
@@ -438,6 +748,7 @@ export default function App() {
   const [marketplaceMode, setMarketplaceMode]     = useState('buy'); // 'buy' or 'sell'
   const [cart, setCart]                           = useState([]);
   const [isCartOpen, setIsCartOpen]               = useState(false);
+  const [wishlist, setWishlist]                   = useState([]);
   const [newListing, setNewListing] = useState({
     title: '', category: '🥬 Vegetables', price: '', quantity: '',
     unit: 'kg', description: '', imageUrl: '',
@@ -681,25 +992,46 @@ export default function App() {
   };
 
   const handleRecommendCrop = (e) => {
-    e.preventDefault();
-    const { soil, water, season } = cropInputs;
-    let crop='Tomato', profit=68000, risk='Medium', demand='High', fertilizer='NPK 19-19-19 (25kg/acre)', yield_='18 Quintals/Acre';
-    if (soil==='Black' && water==='Heavy') { crop='Cotton'; profit=92000; risk='Low'; demand='Very High'; fertilizer='NPK 4:2:1 + Urea 50kg/acre'; yield_='32 Quintals/Acre'; }
-    else if (soil==='Red' && season==='Kharif') { crop='Groundnut'; profit=72000; risk='Medium'; demand='High'; fertilizer='Gypsum 200kg + DAP 50kg/acre'; yield_='22 Quintals/Acre'; }
-    else if (soil==='Sandy') { crop='Watermelon'; profit=85000; risk='High'; demand='High'; fertilizer='Organic Compost 5T + Potash 40kg/acre'; yield_='15 Tons/Acre'; }
-    else if (soil==='Clay' && water==='Heavy') { crop='Paddy (Rice)'; profit=91000; risk='Low'; demand='Very High'; fertilizer='Urea 75kg + MOP 30kg + Zinc Sulphate'; yield_='28 Quintals/Acre'; }
-    else if (season==='Rabi') { crop='Wheat'; profit=62000; risk='Low'; demand='Very High'; fertilizer='DAP 50kg + Urea 60kg/acre'; yield_='25 Quintals/Acre'; }
-    setRecommendation({ crop, profit: profit.toLocaleString('en-IN'), risk, demand, fertilizer, yieldPredict:yield_ });
+    if (e) e.preventDefault();
+    const w = getWeather(selState);
+    const recs = generateCropRecommendations({
+      ...farmSetup,
+      state: selState,
+      district: selDistrict,
+      mandal: selMandal,
+    }, w);
+    setCropRecommendations(recs);
+    setSelectedCropRank(0);
+    setCropStep(5);
   };
 
   const triggerScan = () => {
-    setScanning(true); setScanResult(null);
+    setIsScanning(true);
+    setDiseaseReport(null);
     setTimeout(() => {
-      setScanning(false);
-      if (scanTarget==='spot') setScanResult({ disease:'Early Leaf Spot (Alternaria)', confidence:'96.4%', danger:'Medium', medicine:'Neem Oil 15ml/L or Copper Oxychloride 2.5g/L fungicide spray.', prevention:'Remove lower affected leaves. Avoid overhead irrigation.' });
-      else if (scanTarget==='blast') setScanResult({ disease:'Rice Blast Fungus (Magnaporthe oryzae)', confidence:'93.1%', danger:'High', medicine:'Tricyclazole 75WP at 0.6g/L or Kasugamycin fungicide.', prevention:'Avoid excess Nitrogen. Maintain optimal soil moisture.' });
-      else setScanResult({ disease:'Healthy Leaf — No Infection Detected', confidence:'98.9%', danger:'None', medicine:'No treatment needed. Continue normal crop cycle.', prevention:'Regular weeding and soil moisture inspection.' });
-    }, 2500);
+      setIsScanning(false);
+      const rep = PLANT_DISEASES_DB[scanCropType] || PLANT_DISEASES_DB.tomato_blight;
+      setDiseaseReport(uploadedScanImage ? { ...rep, sampleImage: uploadedScanImage, confidence: '95.8%' } : rep);
+    }, 2000);
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setUploadedScanImage(url);
+      setIsScanning(true);
+      setDiseaseReport(null);
+      setTimeout(() => {
+        setIsScanning(false);
+        const rep = PLANT_DISEASES_DB[scanCropType] || PLANT_DISEASES_DB.tomato_blight;
+        setDiseaseReport({
+          ...rep,
+          sampleImage: url,
+          confidence: '96.5% (High Precision Agronomic AI)'
+        });
+      }, 2200);
+    }
   };
 
   const handleAddLedger = (e) => {
@@ -899,6 +1231,52 @@ export default function App() {
   const generateChatGPTResponse = (text) => {
     const q = text.toLowerCase();
     const w = getWeather(selState);
+    const currCrop = cropRecommendations ? cropRecommendations[selectedCropRank]?.name : 'Tomato / Cotton';
+
+    // Yellow leaves query
+    if (q.includes('yellow') || q.includes('peeli') || q.includes('pasupu') || q.includes('chlorosis')) {
+      if (lang === 'te') {
+        return `🍂 **ఆకులు పసుపు రంగులోకి మారడానికి నివారణ (${currCrop})**:\n\n` +
+               `1. **నత్రజని లోపం**: దిగువ ఆకులు పసుపు రంగులోకి మారితే, ఎకరాకు 25 కేజీల యూరియా లేదా 19-19-19 స్ప్రే (5 గ్రా/లీ) చేయండి.\n` +
+               `2. **ఇనుము/జింక్ లోపం**: పై లేత ఆకులు పసుపు రంగులోకి మారితే, చీలేటెడ్ జింక్ (1 గ్రా/లీ) పిచికారీ చేయండి.\n` +
+               `3. **నీటి నిల్వ**: పొలంలో నీరు నిల్వ ఉంటే వేర్లు ఊపిరాడక పసుపు రంగులోకి మారతాయి; కాలువలు తీసి నీటిని తొలగించండి.`;
+      }
+      if (lang === 'hi') {
+        return `🍂 **पत्तियों का पीला पड़ना — कारण एवं रोकथाम (${currCrop})**:\n\n` +
+               `1. **नाइट्रोजन की कमी**: निचली पत्तियां पीली पड़ रही हैं तो 19-19-19 (5 ग्राम/लीटर पानी) का छिड़काव करें।\n` +
+               `2. **जिंक/आयरन की कमी**: ऊपरी नई पत्तियां पीली हैं तो चिलेटेड जिंक (1 ग्राम/लीटर) स्प्रे करें।\n` +
+               `3. **जलभराव**: अधिक पानी से जड़ें सड़ने लगती हैं, खेत से अतिरिक्त पानी तुरंत निकालें।`;
+      }
+      return `🍂 **Diagnosis & Remedy for Yellowing Leaves (${currCrop})**:\n\n` +
+             `1. **Nitrogen Deficiency**: Older lower leaves turn pale yellow first. Apply 19-19-19 foliar spray (5g/L) or top-dress 25kg Urea/acre.\n` +
+             `2. **Zinc / Micronutrient Chlorosis**: Yellowing between leaf veins on young leaves. Spray Chelated Zinc (1g/L) + Ferrous Sulphate (2g/L).\n` +
+             `3. **Waterlogging & Root Asphyxiation**: Excessive moisture starves roots of oxygen. Ensure drainage channels are clear.\n` +
+             `4. **Sucking Pests (Whiteflies/Thrips)**: Spray Cold-Pressed Neem Oil (15ml/L) or Acetamiprid (0.5g/L).`;
+    }
+
+    // Cotton irrigation query
+    if ((q.includes('cotton') || q.includes('kapas') || q.includes('paththi')) && (q.includes('irrigate') || q.includes('water') || q.includes('pani'))) {
+      return `💧 **Cotton Irrigation Management Guide (${selState})**:\n\n` +
+             `• **Critical Stages**: Square formation (45-50 days), Flowering (70-80 days), and Boll development (90-110 days).\n` +
+             `• **Schedule**: In ${farmSetup.soilType} soil, irrigate every 12-15 days. If using Drip Irrigation, run for 2 hours every alternate morning.\n` +
+             `• **Caution**: Never allow waterlogging at boll development stage; excessive moisture triggers shedding of squares and young bolls.`;
+    }
+
+    // Paddy 30 days fertilizer
+    if ((q.includes('paddy') || q.includes('rice') || q.includes('dhan') || q.includes('vari')) && (q.includes('30') || q.includes('tillering') || q.includes('fertilizer'))) {
+      return `🌾 **Paddy 30-Day (Active Tillering Stage) Nutrient Plan**:\n\n` +
+             `1. **Top Dressing (Per Acre)**: 35 kg Neem-Coated Urea + 10 kg MOP (Potash) + 5 kg Zinc Sulphate.\n` +
+             `2. **Water Management**: Maintain 2-3 cm standing water during fertilizer broadcast; do not drain for 48 hours.\n` +
+             `3. **Weed & Blast Check**: Monitor for early leaf blast spots. Apply Tricyclazole (0.6g/L) if spindle spots appear.`;
+    }
+
+    // Chilli leaf curl
+    if (q.includes('chilli') || q.includes('mirchi') || q.includes('curl') || q.includes('murda') || q.includes('anthracnose')) {
+      return `🌶️ **Chilli Leaf Curl & Pest Shield Guide**:\n\n` +
+             `• **Vector Control (Thrips & Mites)**: Downward curling is caused by mites (spray Fenazaquin 1.5ml/L); upward curling is caused by thrips (spray Fipronil 2ml/L).\n` +
+             `• **Organic Barrier**: Spray Cold-Pressed Neem Oil (15ml/L) + Pongamia oil every 10 days.\n` +
+             `• **Immunity Booster**: Apply Micronutrient Mixture (2g/L) to strengthen plant vigor against virus transmission.`;
+    }
     const tomP = (livePrices['Tomato'] || BASE_PRICES['Tomato'] || 22).toFixed(2);
     const onionP = (livePrices['Onion'] || BASE_PRICES['Onion'] || 28).toFixed(2);
     const cottonP = (livePrices['Cotton (170kg)'] || 28500).toFixed(0);
@@ -1194,49 +1572,193 @@ export default function App() {
           }
         }
 
-        /* P2P Marketplace Styles */
+        /* P2P Marketplace Styles - Responsive 4 col (PC) / 3 col (Tablet) / 2 col (Mobile) */
         .marketplace-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1.25rem;
         }
+        @media (max-width: 1200px) {
+          .marketplace-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        }
+        @media (max-width: 860px) {
+          .marketplace-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+        }
+        @media (max-width: 480px) {
+          .marketplace-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+        }
+
         .product-card {
-          background: #1e1e1e;
-          border: 1px solid #2a2a2a;
-          border-radius: 14px;
+          background: #ffffff;
+          border: 1px solid #E5E7EB;
+          border-radius: 12px;
           overflow: hidden;
-          transition: all 0.3s ease;
+          transition: all 0.25s ease;
           display: flex;
           flex-direction: column;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+          position: relative;
         }
         .product-card:hover {
           border-color: #22c55e;
-          transform: translateY(-4px);
-          box-shadow: 0 8px 30px rgba(34, 197, 94, 0.1);
+          transform: translateY(-3px);
+          box-shadow: 0 10px 25px rgba(22, 101, 52, 0.12);
         }
         .product-img-container {
-          height: 180px;
+          height: 165px;
           position: relative;
-          background: #151515;
+          background: #F3F4F6;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-bottom: 1px solid #2a2a2a;
           overflow: hidden;
+        }
+        @media (max-width: 480px) {
+          .product-img-container { height: 130px; }
         }
         .product-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          transition: transform 0.3s ease;
+        }
+        .product-card:hover .product-img {
+          transform: scale(1.04);
         }
         .product-img-fallback {
-          font-size: 3.5rem;
+          font-size: 3rem;
         }
         .product-details {
-          padding: 1.25rem;
+          padding: 0.9rem;
           display: flex;
           flex-direction: column;
           flex: 1;
+          background: #ffffff;
+        }
+        @media (max-width: 480px) {
+          .product-details { padding: 0.65rem; }
+        }
+
+        .discount-pill {
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          background: #DC2626;
+          color: #ffffff;
+          font-size: 0.65rem;
+          font-weight: 800;
+          padding: 0.15rem 0.45rem;
+          border-radius: 4px;
+          z-index: 2;
+          box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+        }
+        .wishlist-icon-btn {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: rgba(255, 255, 255, 0.9);
+          border: 1px solid rgba(0,0,0,0.08);
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 0.85rem;
+          z-index: 2;
+          transition: transform 0.15s;
+        }
+        .wishlist-icon-btn:hover {
+          transform: scale(1.15);
+        }
+
+        /* Mobile Bottom Nav */
+        .mobile-bottom-nav {
+          display: none;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: #ffffff;
+          border-top: 1px solid #E5E7EB;
+          padding: 0.4rem 0 calc(0.4rem + env(safe-area-inset-bottom));
+          z-index: 4000;
+          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+        }
+        .mobile-bottom-nav-inner {
+          display: flex;
+          justify-content: space-around;
+          align-items: center;
+        }
+        .bottom-nav-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.15rem;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.3rem 0.6rem;
+          color: #64748B;
+          font-family: 'Inter', sans-serif;
+          position: relative;
+        }
+        .bottom-nav-btn .bn-icon { font-size: 1.25rem; }
+        .bottom-nav-btn .bn-label { font-size: 0.65rem; font-weight: 600; }
+        .bottom-nav-btn.active { color: #166534; }
+        .bottom-nav-badge {
+          position: absolute;
+          top: -2px;
+          right: 4px;
+          background: #DC2626;
+          color: #fff;
+          font-size: 0.6rem;
+          width: 15px;
+          height: 15px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 800;
+        }
+        @media (max-width: 768px) {
+          .mobile-bottom-nav { display: block; }
+          main { padding-bottom: 4.5rem !important; }
+        }
+
+        /* Category Filter Pills */
+        .cat-scroll-container {
+          display: flex;
+          gap: 0.5rem;
+          overflow-x: auto;
+          padding-bottom: 0.4rem;
+          margin-bottom: 0.5rem;
+          scrollbar-width: thin;
+        }
+        .cat-scroll-container::-webkit-scrollbar {
+          height: 4px;
+        }
+        .cat-scroll-pill {
+          padding: 0.35rem 0.8rem;
+          border-radius: 20px;
+          border: 1px solid #333;
+          background: #1e1e1e;
+          color: #ccc;
+          font-size: 0.78rem;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.15s;
+        }
+        .cat-scroll-pill:hover {
+          border-color: #22c55e;
+          color: #fff;
+        }
+        .cat-scroll-pill.active {
+          background: #166534;
+          border-color: #22c55e;
+          color: #ffffff;
         }
         .seller-badge {
           font-size: 0.72rem;
@@ -1423,6 +1945,7 @@ export default function App() {
             <div style={{ display:'flex', alignItems:'center', fontWeight:700, fontSize:'1rem', color:'#f1f1f1' }}>
               <button className="hamburger-btn" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>☰</button>
               {TABS.find(t => t.id === activeTab)?.icon} {TABS.find(t => t.id === activeTab)?.label}
+              {weatherLoading && <span style={{fontSize:'.72rem',color:'#60a5fa',marginLeft:'.5rem',fontWeight:500}}>⏳ Updating weather...</span>}
             </div>
             <div style={{ display:'flex', gap:'.6rem', alignItems:'center', flexWrap:'wrap' }}>
               <select className="input" style={{width:'auto',padding:'.4rem .7rem',fontSize:'.8rem'}} value={selState} onChange={e=>handleStateChange(e.target.value)}>
@@ -1490,6 +2013,33 @@ export default function App() {
 
                 {marketplaceMode === 'buy' ? (
                   <>
+                    {/* Horizontal Category Quick Filter Pills */}
+                    <div className="cat-scroll-container">
+                      {[
+                        { label: 'All Items', val: 'All', icon: '🛒' },
+                        { label: 'Vegetables', val: '🥬 Vegetables', icon: '🥬' },
+                        { label: 'Fruits', val: '🍎 Fruits', icon: '🍎' },
+                        { label: 'Grains & Flour', val: '🌾 Grains & Flour', icon: '🌾' },
+                        { label: 'Pulses & Dal', val: '🫘 Pulses & Dal', icon: '🫘' },
+                        { label: 'Spices & Masala', val: '🌶 Spices & Masala', icon: '🌶' },
+                        { label: 'Dry Fruits', val: '🥜 Dry Fruits & Nuts', icon: '🥜' },
+                        { label: 'Dairy & Oils', val: '🥛 Dairy & Oils', icon: '🥛' },
+                        { label: 'Daily Routine', val: '🧴 Daily Routine', icon: '🧴' },
+                        { label: 'Seeds', val: '🌱 Seeds', icon: '🌱' },
+                        { label: 'Fertilizers', val: '🧪 Fertilizers & Agri', icon: '🧪' },
+                        { label: 'Irrigation', val: '💧 Irrigation', icon: '💧' },
+                        { label: 'Farm Tools', val: '🛠️ Farming Tools', icon: '🛠️' },
+                      ].map(cat => (
+                        <button
+                          key={cat.val}
+                          className={`cat-scroll-pill ${marketFilter === cat.val ? 'active' : ''}`}
+                          onClick={() => setMarketFilter(cat.val)}
+                        >
+                          {cat.icon} {cat.label}
+                        </button>
+                      ))}
+                    </div>
+
                     {/* Filters Bar */}
                     <div className="card" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
                       <div style={{ flex: 2, minWidth: '200px' }}>
@@ -1516,11 +2066,15 @@ export default function App() {
                           <option value="All">All Categories</option>
                           <option value="🥬 Vegetables">🥬 Vegetables</option>
                           <option value="🍎 Fruits">🍎 Fruits</option>
-                          <option value="🌾 Grains & Seeds">🌾 Grains & Seeds</option>
-                          <option value="🫘 Pulses & Spices">🫘 Pulses & Spices</option>
+                          <option value="🌾 Grains & Flour">🌾 Grains & Flour</option>
+                          <option value="🫘 Pulses & Dal">🫘 Pulses & Dal</option>
+                          <option value="🌶 Spices & Masala">🌶 Spices & Masala</option>
                           <option value="🥜 Dry Fruits & Nuts">🥜 Dry Fruits & Nuts</option>
                           <option value="🥛 Dairy & Oils">🥛 Dairy & Oils</option>
+                          <option value="🧴 Daily Routine">🧴 Daily Routine</option>
+                          <option value="🌱 Seeds">🌱 Seeds</option>
                           <option value="🧪 Fertilizers & Agri">🧪 Fertilizers & Agri</option>
+                          <option value="💧 Irrigation">💧 Irrigation</option>
                           <option value="🛠️ Farming Tools">🛠️ Farming Tools</option>
                         </select>
                       </div>
@@ -1582,60 +2136,74 @@ export default function App() {
                                    item.category?.includes('Fertilizers') ? '🧪' : '🛠️'}
                                 </div>
                               </div>
+                              {/* Discount badge & Wishlist button on image */}
+                              {item.mrp && item.mrp > item.price && (
+                                <span className="discount-pill">
+                                  {Math.round(((item.mrp - item.price) / item.mrp) * 100)}% OFF
+                                </span>
+                              )}
+                              <button
+                                className="wishlist-icon-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setWishlist(prev => prev.includes(item.id) ? prev.filter(id => id !== item.id) : [...prev, item.id]);
+                                }}
+                                title="Add to Wishlist"
+                              >
+                                {wishlist.includes(item.id) ? '❤️' : '🤍'}
+                              </button>
+
                               <div className="product-details">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.4rem' }}>
-                                  <span style={{ fontSize: '0.72rem', background: '#2a2a2a', color: '#aaa', padding: '0.15rem 0.45rem', borderRadius: 4, fontWeight: 600 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                                  <span style={{ fontSize: '0.68rem', background: '#F0FDF4', color: '#166534', padding: '0.12rem 0.4rem', borderRadius: 4, fontWeight: 700 }}>
                                     {item.category}
                                   </span>
-                                  <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#22c55e' }}>
-                                    ₹{item.price} <span style={{ fontSize: '0.75rem', color: '#888', fontWeight: 500 }}>/ {item.unit}</span>
-                                  </span>
-                                </div>
-                                
-                                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>{item.title}</h3>
-                                <p style={{ fontSize: '0.78rem', color: '#888', lineHeight: 1.4, flex: 1, marginBottom: '0.75rem' }}>{item.description}</p>
-                                
-                                <div style={{ background: '#181818', padding: '0.6rem 0.75rem', borderRadius: 8, fontSize: '0.75rem', border: '1px solid #222', display: 'flex', flexDirection: 'column', gap: '0.2rem', marginBottom: '0.75rem' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#888' }}>Seller:</span>
-                                    <strong style={{ color: '#e2e8f0' }}>{item.sellerName}</strong>
-                                  </div>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#888' }}>Location:</span>
-                                    <span style={{ color: '#e2e8f0' }}>📍 {item.sellerLocation?.mandal || 'Village'}, {item.sellerLocation?.state}</span>
-                                  </div>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#888' }}>Contact:</span>
-                                    <span style={{ color: '#60a5fa', fontWeight: 600 }}>📞 +91 {item.sellerPhone}</span>
-                                  </div>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.2rem', borderTop: '1px solid #222', paddingTop: '0.2rem' }}>
-                                    <span style={{ color: '#888' }}>Stock:</span>
-                                    <strong style={{ color: item.quantity > 5 ? '#22c55e' : '#ef4444' }}>{item.quantity} {item.unit}s left</strong>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.72rem', color: '#D97706', fontWeight: 700 }}>
+                                    <span 
+                                      style={{ cursor: 'pointer' }}
+                                      title="Rate this product"
+                                      onClick={() => handleRateProduct(item.id, 5)}
+                                    >
+                                      ★ {item.rating || 5.0}
+                                    </span>
+                                    <span style={{ color: '#94A3B8', fontWeight: 500 }}>({item.ratingCount || 1})</span>
                                   </div>
                                 </div>
+                                
+                                <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#172017', marginBottom: '0.25rem', lineHeight: 1.3, height: '2.4rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                                  {item.title}
+                                </h3>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-                                    <span style={{ fontSize: '0.65rem', color: '#888', fontWeight: 600 }}>RATING ({item.ratingCount || 1})</span>
-                                    <div className="star-rating">
-                                      {[1,2,3,4,5].map(star => {
-                                        const isGold = star <= Math.round(item.rating || 5);
-                                        return (
-                                          <span 
-                                            key={star} 
-                                            onClick={() => handleRateProduct(item.id, star)}
-                                            style={{ fontSize: '1rem', transition: 'transform 0.1s' }}
-                                            onMouseEnter={e => e.target.style.transform = 'scale(1.3)'}
-                                            onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-                                          >
-                                            {isGold ? '★' : '☆'}
-                                          </span>
-                                        );
-                                      })}
-                                    </div>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', margin: '0.25rem 0 0.4rem' }}>
+                                  <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#15803D' }}>
+                                    ₹{item.price}
+                                  </span>
+                                  <span style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 500 }}>
+                                    /{item.unit}
+                                  </span>
+                                  {item.mrp && item.mrp > item.price && (
+                                    <span style={{ fontSize: '0.75rem', color: '#94A3B8', textDecoration: 'line-through' }}>
+                                      ₹{item.mrp}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                                <p style={{ fontSize: '0.74rem', color: '#64748B', lineHeight: 1.35, height: '2rem', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '0.5rem' }}>
+                                  {item.description}
+                                </p>
+                                
+                                <div style={{ background: '#F8FAF8', padding: '0.45rem 0.6rem', borderRadius: 6, fontSize: '0.7rem', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '0.15rem', marginBottom: '0.65rem' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#64748B' }}>Seller:</span>
+                                    <strong style={{ color: '#172017', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>{item.sellerName}</strong>
                                   </div>
-                                  <div style={{ background: 'rgba(251,191,36,0.1)', color: '#fbbf24', padding: '0.2rem 0.5rem', borderRadius: 4, fontSize: '0.75rem', fontWeight: 700 }}>
-                                    {item.rating || 5.0} / 5.0
+                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#64748B' }}>Location:</span>
+                                    <span style={{ color: '#172017' }}>📍 {item.sellerLocation?.state}</span>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.1rem', borderTop: '1px solid #E5E7EB', paddingTop: '0.15rem' }}>
+                                    <span style={{ color: '#64748B' }}>Stock:</span>
+                                    <strong style={{ color: item.quantity > 5 ? '#15803D' : '#DC2626' }}>{item.quantity} {item.unit}s left</strong>
                                   </div>
                                 </div>
 
@@ -1906,252 +2474,841 @@ export default function App() {
             )}
 
             {/* ════ OVERVIEW ════ */}
-            {activeTab==='overview' && (
-              <div style={{display:'flex',flexDirection:'column',gap:'1.5rem'}}>
-                <div>
-                  <div className="section-title">⚖️ Macro Economy & Fuel — {selState}</div>
-                  <div className="grid4">
-                    {[
-                      { icon:'🪙', label:'Gold (10g)',    val:(liveMcx['Gold (10g)']||72450).toFixed(0),                                               color:'#fbbf24' },
-                      { icon:'☁️', label:'Cotton (Bale)', val:(liveMcx['Cotton (170kg)']||28500).toFixed(0),                                           color:'#94a3b8' },
-                      { icon:'⛽', label:'Petrol / Litre',val:(FUEL_BASE_PRICES.PETROL*(INPUT_STATE_MULTIPLIER[selState]||1.0)).toFixed(2),             color:'#f97316' },
-                      { icon:'🛢️', label:'Diesel / Litre',val:(FUEL_BASE_PRICES.DIESEL*(INPUT_STATE_MULTIPLIER[selState]||1.0)).toFixed(2),            color:'#3b82f6' },
-                    ].map(s=>(
-                      <div key={s.label} className="stat-card">
-                        <div style={{fontSize:'1.5rem'}}>{s.icon}</div>
-                        <div style={{fontSize:'1.4rem',fontWeight:800,color:s.color}}>&#x20B9;{s.val}</div>
-                        <div style={{fontSize:'.75rem',color:'#888',fontWeight:600}}>{s.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            {activeTab==='overview' && (() => {
+              const t = I18N[lang] || I18N.en;
+              const weatherDecisions = calculateWeatherDecisions(weather);
 
-                <div>
-                  <div className="section-title" style={{justifyContent:'space-between'}}>
-                    <span>🌤 Live Weather — {selMandal}, {selDistrict}, {selState}</span>
-                    {liveWeather?.isLive && <span style={{fontSize:'.7rem',background:'#16a34a',color:'#fff',padding:'.15rem .5rem',borderRadius:4,fontWeight:700,animation:'pulse 2s infinite'}}>● LIVE</span>}
-                    {weatherLoading && <span style={{fontSize:'.7rem',color:'#888'}}>Fetching...</span>}
-                  </div>
-
-                  {/* Primary Weather Stats */}
-                  <div className="grid4">
-                    {[
-                      { icon:'🌡', label:'Temperature', val:weather.temp, sub:weather.feelsLike ? `Feels ${weather.feelsLike}` : null, color:'#f97316' },
-                      { icon:'💧', label:'Humidity',    val:weather.humidity, sub:weather.cloudCover ? `Cloud ${weather.cloudCover}` : null, color:'#60a5fa' },
-                      { icon:'🌧', label:'Rain Chance', val:weather.rain, sub:weather.precipitation ? `Precip ${weather.precipitation}` : null, color:'#818cf8' },
-                      { icon:'💨', label:'Wind Speed',  val:weather.wind, sub:weather.windGusts ? `Gusts ${weather.windGusts}` : null, color:'#34d399' },
-                    ].map(s=>(
-                      <div key={s.label} className="stat-card">
-                        <div style={{fontSize:'1.5rem'}}>{s.icon}</div>
-                        <div style={{fontSize:'1.4rem',fontWeight:800,color:s.color}}>{s.val}</div>
-                        <div style={{fontSize:'.75rem',color:'#888',fontWeight:600}}>{s.label}</div>
-                        {s.sub && <div style={{fontSize:'.68rem',color:'#555',fontWeight:500}}>{s.sub}</div>}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Extra live stats row */}
-                  {liveWeather?.isLive && (
-                    <div style={{display:'flex',gap:'.6rem',marginTop:'.75rem',flexWrap:'wrap'}}>
-                      {[
-                        { icon:'🌅', label:'Sunrise', val:weather.sunrise },
-                        { icon:'🌇', label:'Sunset',  val:weather.sunset },
-                        { icon:'🌤', label:'Condition', val:weather.condition },
-                        { icon:'🔽', label:'Pressure', val:weather.pressure },
-                      ].filter(s => s.val).map(s => (
-                        <div key={s.label} style={{background:'#1f1f1f',border:'1px solid #2a2a2a',borderRadius:8,padding:'.5rem .8rem',display:'flex',alignItems:'center',gap:'.5rem',flex:'1 1 120px'}}>
-                          <span style={{fontSize:'1rem'}}>{s.icon}</span>
-                          <div>
-                            <div style={{fontSize:'.68rem',color:'#888'}}>{s.label}</div>
-                            <div style={{fontSize:'.85rem',fontWeight:700,color:'#e2e8f0'}}>{s.val}</div>
-                          </div>
+              return (
+                <div style={{display:'flex',flexDirection:'column',gap:'1.5rem'}}>
+                  {/* Hero Farmer Decision Banner */}
+                  <div className="card" style={{
+                    background: 'linear-gradient(135deg, #0d2818 0%, #041b10 50%, #111827 100%)',
+                    border: '1px solid #15803d',
+                    padding: '1.75rem',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{position:'absolute',right:'-20px',top:'-20px',fontSize:'8rem',opacity:0.08,pointerEvents:'none'}}>🌾</div>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:'1rem'}}>
+                      <div>
+                        <div style={{display:'inline-flex',alignItems:'center',gap:'.4rem',background:'rgba(34,197,94,0.15)',border:'1px solid rgba(34,197,94,0.3)',borderRadius:20,padding:'.25rem .75rem',fontSize:'.75rem',fontWeight:700,color:'#4ade80',marginBottom:'.75rem'}}>
+                          🌱 AI DECISION SUPPORT PLATFORM
                         </div>
-                      ))}
-                      <div style={{background:'#1f1f1f',border:'1px solid #2a2a2a',borderRadius:8,padding:'.5rem .8rem',display:'flex',alignItems:'center',gap:'.5rem',flex:'1 1 120px'}}>
-                        <span style={{fontSize:'1rem'}}>🕐</span>
+                        <h1 style={{fontSize:'1.6rem',fontWeight:800,color:'#fff',lineHeight:1.2,marginBottom:'.4rem'}}>
+                          {t.title}
+                        </h1>
+                        <p style={{fontSize:'.95rem',fontWeight:600,color:'#86efac',marginBottom:'.25rem'}}>
+                          "{t.tagline}"
+                        </p>
+                        <p style={{fontSize:'.82rem',color:'#9ca3af',maxWidth:650}}>
+                          {t.subtagline}
+                        </p>
+                      </div>
+
+                      <div style={{background:'rgba(0,0,0,0.4)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:10,padding:'.75rem 1rem',minWidth:220}}>
+                        <div style={{fontSize:'.72rem',color:'#9ca3af',textTransform:'uppercase',fontWeight:700}}>Farmer Profile</div>
+                        <div style={{fontSize:'.95rem',fontWeight:800,color:'#fff',marginTop:'.2rem'}}>{user.name || 'Registered Farmer'} 👋</div>
+                        <div style={{fontSize:'.78rem',color:'#60a5fa',marginTop:'.2rem'}}>📍 {selMandal}, {selDistrict}, {selState}</div>
+                        <div style={{fontSize:'.72rem',color:'#86efac',marginTop:'.3rem',display:'flex',alignItems:'center',gap:'.3rem'}}>
+                          <span>🌤️ {weather.temp}</span> · <span>💧 {weather.humidity}</span> · <span>🌧️ {weather.rain}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3 Large Action Cards */}
+                  <div>
+                    <div className="section-title" style={{fontSize:'1rem',color:'#86efac'}}>
+                      ⚡ {t.quickActions}
+                    </div>
+                    <div className="grid3">
+                      {/* Card 1: Find Best Crop */}
+                      <div className="card" style={{
+                        background: 'linear-gradient(145deg, #132a13 0%, #0d1b12 100%)',
+                        border: '1px solid #22c55e',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '1rem',
+                        transition: 'all 0.2s ease'
+                      }} onClick={() => setActiveTab('advisor')}>
                         <div>
-                          <div style={{fontSize:'.68rem',color:'#888'}}>Updated</div>
-                          <div style={{fontSize:'.85rem',fontWeight:700,color:'#e2e8f0'}}>{weather.lastUpdated || 'Just now'}</div>
+                          <div style={{fontSize:'2.2rem',marginBottom:'.4rem'}}>🌱</div>
+                          <h3 style={{fontSize:'1.15rem',fontWeight:800,color:'#fff'}}>{t.btnCropAdvisor}</h3>
+                          <p style={{fontSize:'.82rem',color:'#cbd5e1',marginTop:'.4rem',lineHeight:1.5}}>
+                            {t.btnCropDesc}
+                          </p>
+                        </div>
+                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:'.75rem'}}>
+                          <span style={{fontSize:'.75rem',color:'#86efac',fontWeight:700}}>5-Step Farm Setup</span>
+                          <span style={{color:'#4ade80',fontWeight:800,fontSize:'.9rem'}}>Launch Advisor →</span>
+                        </div>
+                      </div>
+
+                      {/* Card 2: Plant Health Scanner */}
+                      <div className="card" style={{
+                        background: 'linear-gradient(145deg, #1f1b2e 0%, #13111c 100%)',
+                        border: '1px solid #8b5cf6',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '1rem',
+                        transition: 'all 0.2s ease'
+                      }} onClick={() => setActiveTab('scanner')}>
+                        <div>
+                          <div style={{fontSize:'2.2rem',marginBottom:'.4rem'}}>🔬</div>
+                          <h3 style={{fontSize:'1.15rem',fontWeight:800,color:'#fff'}}>{t.btnDiseaseScanner}</h3>
+                          <p style={{fontSize:'.82rem',color:'#cbd5e1',marginTop:'.4rem',lineHeight:1.5}}>
+                            {t.btnDiseaseDesc}
+                          </p>
+                        </div>
+                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:'.75rem'}}>
+                          <span style={{fontSize:'.75rem',color:'#c4b5fd',fontWeight:700}}>Camera & Photo Upload</span>
+                          <span style={{color:'#a78bfa',fontWeight:800,fontSize:'.9rem'}}>Scan Leaf Now →</span>
+                        </div>
+                      </div>
+
+                      {/* Card 3: AI Farmer Assistant */}
+                      <div className="card" style={{
+                        background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
+                        border: '1px solid #3b82f6',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '1rem',
+                        transition: 'all 0.2s ease'
+                      }} onClick={() => setActiveTab('chat')}>
+                        <div>
+                          <div style={{fontSize:'2.2rem',marginBottom:'.4rem'}}>🤖</div>
+                          <h3 style={{fontSize:'1.15rem',fontWeight:800,color:'#fff'}}>{t.btnAiAssistant}</h3>
+                          <p style={{fontSize:'.82rem',color:'#cbd5e1',marginTop:'.4rem',lineHeight:1.5}}>
+                            {t.btnAiDesc}
+                          </p>
+                        </div>
+                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderTop:'1px solid rgba(255,255,255,0.08)',paddingTop:'.75rem'}}>
+                          <span style={{fontSize:'.75rem',color:'#93c5fd',fontWeight:700}}>Voice & Chat (TE/HI/EN)</span>
+                          <span style={{color:'#60a5fa',fontWeight:800,fontSize:'.9rem'}}>Open Assistant →</span>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-
-                <div className="grid2">
-                  <div className="card">
-                    <div className="section-title">📅 7-Day Forecast</div>
-                    <div style={{background:'rgba(239,68,68,.05)',border:'1px solid rgba(239,68,68,.15)',borderRadius:8,padding:'.75rem',fontSize:'.83rem',color:'#fca5a5',marginBottom:'1rem',lineHeight:1.6}}>
-                      ⚠️ <strong>Advisory:</strong> {weather.advisory}
-                    </div>
-                    <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'.4rem'}}>
-                      {(weather.forecast||[]).map((f,i)=>(
-                        <div key={i} style={{textAlign:'center',background:'#222',borderRadius:8,padding:'.5rem .2rem',border:i===0?'1px solid #333':'1px solid transparent'}}>
-                          <div style={{fontSize:'.65rem',color:i===0?'#22c55e':'#888',fontWeight:700}}>{i===0?'Today':f.day}</div>
-                          {f.date && <div style={{fontSize:'.55rem',color:'#555'}}>{f.date}</div>}
-                          <div style={{fontSize:'1.2rem',margin:'.2rem 0'}}>{f.icon}</div>
-                          <div style={{fontSize:'.7rem',fontWeight:700,color:'#f87171'}}>{f.high}°</div>
-                          <div style={{fontSize:'.65rem',color:'#60a5fa'}}>{f.low}°</div>
-                          {f.rainChance !== undefined && <div style={{fontSize:'.55rem',color:'#818cf8',marginTop:'.15rem'}}>🌧{f.rainChance}%</div>}
-                        </div>
-                      ))}
-                    </div>
                   </div>
-                  <div className="card">
-                    <div className="section-title">👨‍🌾 Farmer Profile</div>
-                    <div style={{display:'flex',flexDirection:'column',gap:'.6rem'}}>
+
+                  {/* 🌾 AGRICULTURAL WEATHER DECISIONS WIDGET */}
+                  <div>
+                    <div className="section-title" style={{justifyContent:'space-between'}}>
+                      <span style={{display:'flex',alignItems:'center',gap:'.5rem'}}>
+                        🌤️ {t.weatherInsights} — {selMandal}, {selDistrict}, {selState}
+                      </span>
+                      {liveWeather?.isLive && <span style={{fontSize:'.7rem',background:'#16a34a',color:'#fff',padding:'.15rem .5rem',borderRadius:4,fontWeight:700}}>● LIVE OPEN-METEO</span>}
+                    </div>
+
+                    {/* 3 Actionable Decision Cards */}
+                    <div className="grid3" style={{marginBottom:'1rem'}}>
+                      {/* Irrigation Decision */}
+                      <div className="card" style={{borderLeft:`4px solid ${weatherDecisions.irrigation.color}`,padding:'1.1rem'}}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.4rem'}}>
+                          <span style={{fontSize:'.75rem',fontWeight:700,color:'#888',textTransform:'uppercase'}}>{t.irrigationInsight}</span>
+                          <span style={{fontSize:'.7rem',fontWeight:800,background:'rgba(255,255,255,0.06)',color:weatherDecisions.irrigation.color,padding:'.15rem .5rem',borderRadius:4}}>
+                            {weatherDecisions.irrigation.badge}
+                          </span>
+                        </div>
+                        <div style={{fontSize:'1rem',fontWeight:800,color:'#fff',display:'flex',alignItems:'center',gap:'.4rem',marginBottom:'.3rem'}}>
+                          <span>{weatherDecisions.irrigation.icon}</span> {weatherDecisions.irrigation.action}
+                        </div>
+                        <div style={{fontSize:'.78rem',color:'#aaa',lineHeight:1.45}}>
+                          {weatherDecisions.irrigation.detail}
+                        </div>
+                      </div>
+
+                      {/* Field Work & Spraying */}
+                      <div className="card" style={{borderLeft:`4px solid ${weatherDecisions.fieldWork.color}`,padding:'1.1rem'}}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.4rem'}}>
+                          <span style={{fontSize:'.75rem',fontWeight:700,color:'#888',textTransform:'uppercase'}}>{t.fieldWorkInsight}</span>
+                          <span style={{fontSize:'.7rem',fontWeight:800,background:'rgba(255,255,255,0.06)',color:weatherDecisions.fieldWork.color,padding:'.15rem .5rem',borderRadius:4}}>
+                            {weatherDecisions.fieldWork.badge}
+                          </span>
+                        </div>
+                        <div style={{fontSize:'1rem',fontWeight:800,color:'#fff',display:'flex',alignItems:'center',gap:'.4rem',marginBottom:'.3rem'}}>
+                          <span>{weatherDecisions.fieldWork.icon}</span> {weatherDecisions.fieldWork.action}
+                        </div>
+                        <div style={{fontSize:'.78rem',color:'#aaa',lineHeight:1.45}}>
+                          {weatherDecisions.fieldWork.detail}
+                        </div>
+                      </div>
+
+                      {/* Disease & Pest Risk */}
+                      <div className="card" style={{borderLeft:`4px solid ${weatherDecisions.diseaseRisk.color}`,padding:'1.1rem'}}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.4rem'}}>
+                          <span style={{fontSize:'.75rem',fontWeight:700,color:'#888',textTransform:'uppercase'}}>{t.diseaseRiskAlert}</span>
+                          <span style={{fontSize:'.7rem',fontWeight:800,background:'rgba(255,255,255,0.06)',color:weatherDecisions.diseaseRisk.color,padding:'.15rem .5rem',borderRadius:4}}>
+                            {weatherDecisions.diseaseRisk.badge}
+                          </span>
+                        </div>
+                        <div style={{fontSize:'1rem',fontWeight:800,color:'#fff',display:'flex',alignItems:'center',gap:'.4rem',marginBottom:'.3rem'}}>
+                          <span>{weatherDecisions.diseaseRisk.icon}</span> {weatherDecisions.diseaseRisk.action}
+                        </div>
+                        <div style={{fontSize:'.78rem',color:'#aaa',lineHeight:1.45}}>
+                          {weatherDecisions.diseaseRisk.detail}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Meteorological Numbers */}
+                    <div className="grid4">
                       {[
-                        ['Name',        user.name||'Registered Farmer'],
-                        ['Contact',     user.email||`+91 ${user.phone||'–'}`],
-                        ['Location',    `${selMandal}, ${selDistrict}, ${selState}`],
-                        ['Primary Crop','Cotton / Tomato / Paddy'],
-                        ['Farm Size',   '5.5 Acres — Black Cotton Soil'],
-                        ['Water Source','Borewell + Drip Irrigation'],
-                      ].map(([k,v])=>(
-                        <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid #222',paddingBottom:'.5rem'}}>
-                          <span style={{fontSize:'.8rem',color:'#888'}}>{k}</span>
-                          <span style={{fontSize:'.83rem',fontWeight:600,color:'#e2e8f0'}}>{v}</span>
+                        { icon:'🌡️', label:'Temperature', val:weather.temp, sub:weather.feelsLike ? `Feels ${weather.feelsLike}` : 'Normal range', color:'#f97316' },
+                        { icon:'💧', label:'Humidity', val:weather.humidity, sub:weather.cloudCover ? `Cloud ${weather.cloudCover}` : 'Vegetative zone', color:'#60a5fa' },
+                        { icon:'🌧️', label:'Rain Probability', val:weather.rain, sub:weather.precipitation ? `Precip ${weather.precipitation}` : 'Forecast index', color:'#818cf8' },
+                        { icon:'💨', label:'Wind Speed', val:weather.wind, sub:weather.windGusts ? `Gusts ${weather.windGusts}` : 'Safe for spray', color:'#34d399' },
+                      ].map(s=>(
+                        <div key={s.label} className="stat-card">
+                          <div style={{fontSize:'1.3rem'}}>{s.icon}</div>
+                          <div style={{fontSize:'1.3rem',fontWeight:800,color:s.color}}>{s.val}</div>
+                          <div style={{fontSize:'.72rem',color:'#888',fontWeight:600}}>{s.label}</div>
+                          <div style={{fontSize:'.68rem',color:'#555'}}>{s.sub}</div>
                         </div>
                       ))}
                     </div>
+
+                    {/* 7-Day Forecast */}
+                    <div className="card" style={{marginTop:'1rem'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'.75rem'}}>
+                        <span style={{fontSize:'.85rem',fontWeight:700,color:'#f1f1f1'}}>📅 7-Day Agricultural Forecast</span>
+                        <span style={{fontSize:'.72rem',color:'#888'}}>Updated {weather.lastUpdated || 'Just now'}</span>
+                      </div>
+                      <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:'.4rem'}}>
+                        {(weather.forecast||[]).map((f,i)=>(
+                          <div key={i} style={{textAlign:'center',background:'#1f1f1f',borderRadius:8,padding:'.6rem .2rem',border:i===0?'1px solid #22c55e':'1px solid #2a2a2a'}}>
+                            <div style={{fontSize:'.65rem',color:i===0?'#22c55e':'#888',fontWeight:700}}>{i===0?'Today':f.day}</div>
+                            {f.date && <div style={{fontSize:'.55rem',color:'#555'}}>{f.date}</div>}
+                            <div style={{fontSize:'1.2rem',margin:'.25rem 0'}}>{f.icon}</div>
+                            <div style={{fontSize:'.72rem',fontWeight:700,color:'#f87171'}}>{f.high}°</div>
+                            <div style={{fontSize:'.65rem',color:'#60a5fa'}}>{f.low}°</div>
+                            {f.rainChance !== undefined && <div style={{fontSize:'.55rem',color:'#818cf8',marginTop:'.2rem'}}>🌧️{f.rainChance}%</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Soil Health & Mandi Rates Side by Side */}
+                  <div className="grid2">
+                    {/* Soil Health */}
+                    <div className="card">
+                      <div className="section-title">🧪 {t.soilHealth}</div>
+                      <div style={{display:'flex',flexDirection:'column',gap:'.75rem'}}>
+                        {[
+                          { name:'Nitrogen (N)', val:'75 kg/ha', status:'Optimal', color:'#22c55e', note:'Good for tillering' },
+                          { name:'Phosphorus (P)', val:'35 kg/ha', status:'Medium', color:'#f59e0b', note:'Add DAP at basal stage' },
+                          { name:'Potassium (K)', val:'45 kg/ha', status:'Balanced', color:'#22c55e', note:'Supports grain filling' },
+                          { name:'Soil Reaction (pH)', val:'6.8 pH', status:'Ideal (6.5-7.5)', color:'#3b82f6', note:'High nutrient uptake' },
+                        ].map(s=>(
+                          <div key={s.name} style={{background:'#1f1f1f',borderRadius:8,padding:'.65rem .85rem',border:'1px solid #2a2a2a',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                            <div>
+                              <div style={{fontSize:'.82rem',fontWeight:700,color:'#fff'}}>{s.name}</div>
+                              <div style={{fontSize:'.7rem',color:'#888'}}>{s.note}</div>
+                            </div>
+                            <div style={{textAlign:'right'}}>
+                              <div style={{fontSize:'.9rem',fontWeight:800,color:s.color}}>{s.val}</div>
+                              <div style={{fontSize:'.68rem',color:s.color,fontWeight:600}}>{s.status}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Live Mandi Rate Highlights */}
+                    <div className="card">
+                      <div className="section-title" style={{justifyContent:'space-between'}}>
+                        <span>⚡ {t.mandiPrices}</span>
+                        <span style={{fontSize:'.68rem',color:'#888'}}>e-NAM / Agmarknet</span>
+                      </div>
+                      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.6rem'}}>
+                        {['Paddy (Rice)','Cotton (Long Staple)','Tomato','Onion','Red Chilli (Dry)','Turmeric (Haldi)'].map(crop=>{
+                          const price=livePrices[crop]||BASE_PRICES[crop]||20;
+                          const base=BASE_PRICES[crop]||20;
+                          const pct=(((price-base)/base)*100).toFixed(1);
+                          const isUp=priceTrend[crop]!=='down';
+                          return (
+                            <div key={crop} style={{background:'#1f1f1f',borderRadius:8,padding:'.65rem .75rem',border:'1px solid #2a2a2a',display:'flex',flexDirection:'column',gap:'.2rem'}}>
+                              <div style={{fontSize:'.72rem',color:'#888',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{crop}</div>
+                              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                                <span style={{fontSize:'1rem',fontWeight:800,color:isUp?'#22c55e':'#ef4444'}}>₹{price.toFixed(0)}</span>
+                                <span style={{fontSize:'.68rem',fontWeight:700,color:isUp?'#22c55e':'#ef4444'}}>{isUp?'▲':'▼'}{Math.abs(pct)}%</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
+              );
+            })()}
 
+            {/* ════ AI CROP ADVISOR (5-STEP AGRI DECISION PLATFORM) ════ */}
+            {activeTab==='advisor' && (() => {
+              const t = I18N[lang] || I18N.en;
+              const activeRec = cropRecommendations ? cropRecommendations[selectedCropRank] : null;
 
-                <div className="card">
-                  <div className="section-title">⚡ Live Commodity Prices — {selState} Mandis</div>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(175px,1fr))',gap:'.7rem'}}>
-                    {['Tomato','Onion','Potato','Wheat','Paddy (Rice)','Cotton (Long Staple)','Turmeric (Haldi)','Red Chilli (Dry)','Soybean (Yellow)','Groundnut (in shell)','Toor Dal (Arhar)','Moong Dal (Green)'].map(crop=>{
-                      const price=livePrices[crop]||BASE_PRICES[crop]||20;
-                      const base=BASE_PRICES[crop]||20;
-                      const pct=(((price-base)/base)*100).toFixed(1);
-                      const isUp=priceTrend[crop]!=='down';
-                      const flash=priceFlash[crop];
-                      return (
-                        <div key={crop} className={`price-row${flash?(isUp?' flash-up':' flash-down'):''}`} style={{background:'#1f1f1f',borderRadius:8,padding:'.75rem',border:'1px solid #2a2a2a',display:'flex',flexDirection:'column',gap:'.3rem'}}>
-                          <div style={{fontSize:'.75rem',color:'#888'}}>{crop}</div>
-                          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                            <span style={{fontSize:'1.1rem',fontWeight:800,color:isUp?'#22c55e':'#ef4444'}}>&#x20B9;{price.toFixed(2)}</span>
-                            <span style={{fontSize:'.72rem',fontWeight:700,color:isUp?'#22c55e':'#ef4444'}}>{isUp?'▲':'▼'}{Math.abs(pct)}%</span>
+              return (
+                <div style={{display:'flex',flexDirection:'column',gap:'1.5rem'}}>
+                  {/* Step Progress Header */}
+                  <div className="card" style={{padding:'1rem 1.5rem'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:'.5rem',marginBottom:'.75rem'}}>
+                      <div>
+                        <h2 style={{fontSize:'1.2rem',fontWeight:800,color:'#fff'}}>🌱 AI Farm Setup & Crop Recommendation</h2>
+                        <p style={{fontSize:'.8rem',color:'#888',marginTop:'.2rem'}}>
+                          Enter your exact farm, soil, and weather variables to compute Top 3 crops with Suitability Scores and Farm Action Plans.
+                        </p>
+                      </div>
+                      <span style={{fontSize:'.75rem',background:'rgba(34,197,94,0.15)',color:'#4ade80',padding:'.3rem .75rem',borderRadius:20,fontWeight:700}}>
+                        Step {cropStep} of 5
+                      </span>
+                    </div>
+
+                    {/* Step Tabs */}
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(5, 1fr)',gap:'.5rem'}}>
+                      {[
+                        { num: 1, label: t.stepLocation },
+                        { num: 2, label: t.stepFarm },
+                        { num: 3, label: t.stepSoil },
+                        { num: 4, label: t.stepSeason },
+                        { num: 5, label: t.stepPlan },
+                      ].map(s => (
+                        <button
+                          key={s.num}
+                          onClick={() => {
+                            if (s.num === 5 && !cropRecommendations) handleRecommendCrop();
+                            else setCropStep(s.num);
+                          }}
+                          style={{
+                            background: cropStep === s.num ? '#16a34a' : cropStep > s.num ? '#1f2937' : '#111827',
+                            color: cropStep === s.num ? '#fff' : cropStep > s.num ? '#86efac' : '#6b7280',
+                            border: `1px solid ${cropStep === s.num ? '#22c55e' : '#374151'}`,
+                            borderRadius: 8,
+                            padding: '.5rem .25rem',
+                            fontSize: '.72rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            textAlign: 'center'
+                          }}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Step 1: Location */}
+                  {cropStep === 1 && (
+                    <div className="card" style={{maxWidth:650,margin:'0 auto',width:'100%'}}>
+                      <h3 style={{fontSize:'1.05rem',fontWeight:700,color:'#fff',marginBottom:'.5rem'}}>📍 Step 1 — Verify Location</h3>
+                      <p style={{fontSize:'.8rem',color:'#888',marginBottom:'1.25rem'}}>Agro-climatic zones, rainfall norms, and mandi pricing are mapped to your location.</p>
+                      <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+                        <div>
+                          <label className="fld">State</label>
+                          <select className="input" value={selState} onChange={e=>handleStateChange(e.target.value)}>
+                            {ALL_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
+                          <div>
+                            <label className="fld">District</label>
+                            <select className="input" value={selDistrict} onChange={e=>handleDistrictChange(e.target.value)}>
+                              {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="fld">Mandal / Village</label>
+                            <select className="input" value={selMandal} onChange={e=>setSelMandal(e.target.value)}>
+                              {mandals.map(m => <option key={m} value={m}>{m}</option>)}
+                            </select>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ════ AI CROP ADVISOR ════ */}
-            {activeTab==='advisor' && (
-              <div className="grid2">
-                <div className="card">
-                  <div className="section-title">🌱 AI Crop Recommendation Engine</div>
-                  <p style={{fontSize:'.85rem',color:'#888',marginBottom:'1.25rem'}}>Enter your farm details. Our AI analyzes soil, water, season, and market demand to suggest the most profitable crop.</p>
-                  <form onSubmit={handleRecommendCrop} style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
-                    {[
-                      {label:'Soil Type',id:'soil',opts:['Black','Red','Sandy','Clay','Loamy','Alluvial']},
-                      {label:'Water Availability',id:'water',opts:['Light','Medium','Heavy','Drip Only']},
-                      {label:'Cropping Season',id:'season',opts:['Kharif','Rabi','Zaid','Year Round']},
-                    ].map(f=>(
-                      <div key={f.id}>
-                        <label className="fld">{f.label}</label>
-                        <select className="input" value={cropInputs[f.id]} onChange={e=>setCropInputs(p=>({...p,[f.id]:e.target.value}))}>
-                          {f.opts.map(o=><option key={o} value={o}>{o}</option>)}
-                        </select>
-                      </div>
-                    ))}
-                    <div>
-                      <label className="fld">Farm Area (Acres)</label>
-                      <input className="input" type="number" value={cropInputs.area} min="0.1" step="0.5" onChange={e=>setCropInputs(p=>({...p,area:e.target.value}))} />
-                    </div>
-                    <button type="submit" className="btn btn-primary" style={{marginTop:'.5rem'}}>🧠 Generate Recommendation</button>
-                  </form>
-                </div>
-                <div className="card">
-                  <div className="section-title">📊 Recommendation Result</div>
-                  {recommendation ? (
-                    <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
-                      <div style={{background:'rgba(34,197,94,.07)',border:'1px solid rgba(34,197,94,.2)',borderRadius:10,padding:'1.25rem',textAlign:'center'}}>
-                        <div style={{fontSize:'2rem',marginBottom:'.5rem'}}>🏆</div>
-                        <div style={{fontSize:'1.6rem',fontWeight:800,color:'#22c55e'}}>{recommendation.crop}</div>
-                        <div style={{fontSize:'.85rem',color:'#888',marginTop:'.3rem'}}>Best crop for your conditions</div>
-                      </div>
-                      {[
-                        ['💵 Estimated Profit',`&#x20B9;${recommendation.profit}/season`],
-                        ['⚠️ Risk Level',recommendation.risk],
-                        ['📊 Market Demand',recommendation.demand],
-                        ['🧪 Fertilizer Plan',recommendation.fertilizer],
-                        ['📦 Expected Yield',recommendation.yieldPredict],
-                        ['📈 Live Market Price',`&#x20B9;${(livePrices[recommendation.crop]||20).toFixed(2)}/unit`],
-                      ].map(([k,v])=>(
-                        <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:'1rem',padding:'.6rem .8rem',background:'#1f1f1f',borderRadius:8,border:'1px solid #2a2a2a'}}>
-                          <span style={{fontSize:'.82rem',color:'#888',flexShrink:0}}>{k}</span>
-                          <span style={{fontSize:'.85rem',fontWeight:700,color:'#f1f1f1',textAlign:'right'}} dangerouslySetInnerHTML={{__html:v}} />
+                        <div style={{display:'flex',justifyContent:'flex-end',marginTop:'.5rem'}}>
+                          <button className="btn btn-primary" onClick={() => setCropStep(2)}>
+                            {t.next}
+                          </button>
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  ) : (
-                    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:300,gap:'1rem',opacity:.5,textAlign:'center'}}>
-                      <span style={{fontSize:'3rem'}}>🌱</span>
-                      <p style={{color:'#888',fontSize:'.9rem'}}>Fill the form and click Generate to get personalized crop advice.</p>
+                  )}
+
+                  {/* Step 2: Farm Details */}
+                  {cropStep === 2 && (
+                    <div className="card" style={{maxWidth:650,margin:'0 auto',width:'100%'}}>
+                      <h3 style={{fontSize:'1.05rem',fontWeight:700,color:'#fff',marginBottom:'.5rem'}}>🌾 Step 2 — Farm Specifics</h3>
+                      <p style={{fontSize:'.8rem',color:'#888',marginBottom:'1.25rem'}}>Farm size, irrigation facilities, and previous crop rotation dictate agronomic success.</p>
+                      <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+                        <div>
+                          <label className="fld">Farm Area (Acres)</label>
+                          <input className="input" type="number" step="0.5" min="0.5" value={farmSetup.farmSize} onChange={e => setFarmSetup(p=>({...p, farmSize: e.target.value}))} />
+                        </div>
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
+                          <div>
+                            <label className="fld">Irrigation Source</label>
+                            <select className="input" value={farmSetup.irrigation} onChange={e => setFarmSetup(p=>({...p, irrigation: e.target.value}))}>
+                              <option value="Drip Irrigation">Drip Irrigation (Micro)</option>
+                              <option value="Borewell + Sprinkler">Borewell + Sprinkler</option>
+                              <option value="Canal / Flood">Canal / River Flood</option>
+                              <option value="Rainfed">Rainfed (Monsoon Only)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="fld">Previous Cultivated Crop</label>
+                            <select className="input" value={farmSetup.prevCrop} onChange={e => setFarmSetup(p=>({...p, prevCrop: e.target.value}))}>
+                              <option value="Legumes / Pulses">Legumes / Pulses (Nitrogen fixing)</option>
+                              <option value="Paddy (Rice)">Paddy (Rice)</option>
+                              <option value="Cotton">Cotton</option>
+                              <option value="Maize">Maize</option>
+                              <option value="Vegetables">Vegetables</option>
+                              <option value="Fallow / New Land">Fallow / New Land</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div style={{display:'flex',justifyContent:'space-between',marginTop:'.5rem'}}>
+                          <button className="btn btn-outline" onClick={() => setCropStep(1)}>{t.back}</button>
+                          <button className="btn btn-primary" onClick={() => setCropStep(3)}>{t.next}</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 3: Soil Health */}
+                  {cropStep === 3 && (
+                    <div className="card" style={{maxWidth:650,margin:'0 auto',width:'100%'}}>
+                      <h3 style={{fontSize:'1.05rem',fontWeight:700,color:'#fff',marginBottom:'.5rem'}}>🧪 Step 3 — Soil Nutrients & pH</h3>
+                      <p style={{fontSize:'.8rem',color:'#888',marginBottom:'1.25rem'}}>Enter your Soil Health Card values (or use local averages).</p>
+                      <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+                        <div>
+                          <label className="fld">Soil Type</label>
+                          <select className="input" value={farmSetup.soilType} onChange={e => setFarmSetup(p=>({...p, soilType: e.target.value}))}>
+                            <option value="Black Cotton">Black Cotton Soil (Regur)</option>
+                            <option value="Red Loamy">Red Loamy Soil</option>
+                            <option value="Alluvial">Alluvial Soil</option>
+                            <option value="Clay">Clay Soil</option>
+                            <option value="Sandy Loam">Sandy Loam Soil</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <div style={{display:'flex',justifyContent:'space-between',fontSize:'.78rem',color:'#ccc',marginBottom:'.3rem'}}>
+                            <span>Nitrogen (N): <strong>{farmSetup.nitrogen} kg/ha</strong></span>
+                            <span style={{color:'#888'}}>Scale: 20–140</span>
+                          </div>
+                          <input type="range" min="20" max="140" value={farmSetup.nitrogen} onChange={e => setFarmSetup(p=>({...p, nitrogen: parseInt(e.target.value)}))} style={{width:'100%',accentColor:'#22c55e'}} />
+                        </div>
+
+                        <div>
+                          <div style={{display:'flex',justifyContent:'space-between',fontSize:'.78rem',color:'#ccc',marginBottom:'.3rem'}}>
+                            <span>Phosphorus (P): <strong>{farmSetup.phosphorus} kg/ha</strong></span>
+                            <span style={{color:'#888'}}>Scale: 10–90</span>
+                          </div>
+                          <input type="range" min="10" max="90" value={farmSetup.phosphorus} onChange={e => setFarmSetup(p=>({...p, phosphorus: parseInt(e.target.value)}))} style={{width:'100%',accentColor:'#f59e0b'}} />
+                        </div>
+
+                        <div>
+                          <div style={{display:'flex',justifyContent:'space-between',fontSize:'.78rem',color:'#ccc',marginBottom:'.3rem'}}>
+                            <span>Potassium (K): <strong>{farmSetup.potassium} kg/ha</strong></span>
+                            <span style={{color:'#888'}}>Scale: 10–100</span>
+                          </div>
+                          <input type="range" min="10" max="100" value={farmSetup.potassium} onChange={e => setFarmSetup(p=>({...p, potassium: parseInt(e.target.value)}))} style={{width:'100%',accentColor:'#3b82f6'}} />
+                        </div>
+
+                        <div>
+                          <div style={{display:'flex',justifyContent:'space-between',fontSize:'.78rem',color:'#ccc',marginBottom:'.3rem'}}>
+                            <span>Soil pH Level: <strong>{farmSetup.ph} pH</strong></span>
+                            <span style={{color:'#888'}}>Scale: 4.5–8.5</span>
+                          </div>
+                          <input type="range" min="4.5" max="8.5" step="0.1" value={farmSetup.ph} onChange={e => setFarmSetup(p=>({...p, ph: parseFloat(e.target.value)}))} style={{width:'100%',accentColor:'#a855f7'}} />
+                        </div>
+
+                        <div style={{display:'flex',justifyContent:'space-between',marginTop:'.5rem'}}>
+                          <button className="btn btn-outline" onClick={() => setCropStep(2)}>{t.back}</button>
+                          <button className="btn btn-primary" onClick={() => setCropStep(4)}>{t.next}</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 4: Season */}
+                  {cropStep === 4 && (
+                    <div className="card" style={{maxWidth:650,margin:'0 auto',width:'100%'}}>
+                      <h3 style={{fontSize:'1.05rem',fontWeight:700,color:'#fff',marginBottom:'.5rem'}}>📅 Step 4 — Cropping Season</h3>
+                      <p style={{fontSize:'.8rem',color:'#888',marginBottom:'1.25rem'}}>Select your upcoming planting period.</p>
+                      <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
+                        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'.75rem'}}>
+                          {[
+                            { id: 'Kharif', label: 'Kharif (Monsoon)', sub: 'June – October', icon: '🌧️' },
+                            { id: 'Rabi', label: 'Rabi (Winter)', sub: 'October – March', icon: '❄️' },
+                            { id: 'Zaid', label: 'Zaid (Summer)', sub: 'March – June', icon: '☀️' },
+                          ].map(s => (
+                            <div
+                              key={s.id}
+                              onClick={() => setFarmSetup(p=>({...p, season: s.id}))}
+                              style={{
+                                background: farmSetup.season === s.id ? '#1e3a29' : '#1f1f1f',
+                                border: `2px solid ${farmSetup.season === s.id ? '#22c55e' : '#2a2a2a'}`,
+                                borderRadius: 10,
+                                padding: '1rem .75rem',
+                                textAlign: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              <div style={{fontSize:'1.5rem',marginBottom:'.3rem'}}>{s.icon}</div>
+                              <div style={{fontSize:'.85rem',fontWeight:700,color:'#fff'}}>{s.label}</div>
+                              <div style={{fontSize:'.7rem',color:'#888',marginTop:'.2rem'}}>{s.sub}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div style={{display:'flex',justifyContent:'space-between',marginTop:'1rem'}}>
+                          <button className="btn btn-outline" onClick={() => setCropStep(3)}>{t.back}</button>
+                          <button className="btn btn-primary" style={{padding:'.75rem 1.5rem',fontSize:'.95rem',fontWeight:800}} onClick={handleRecommendCrop}>
+                            {t.generatePlan}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 5: AI Recommendations Output */}
+                  {cropStep === 5 && (
+                    <div>
+                      {!cropRecommendations ? (
+                        <div className="card" style={{textAlign:'center',padding:'3rem'}}>
+                          <div style={{fontSize:'3rem',marginBottom:'1rem'}}>🌱</div>
+                          <p style={{color:'#888'}}>Generating multi-criteria agronomic plan...</p>
+                          <button className="btn btn-primary" style={{marginTop:'1rem'}} onClick={handleRecommendCrop}>{t.generatePlan}</button>
+                        </div>
+                      ) : (
+                        <div style={{display:'flex',flexDirection:'column',gap:'1.25rem'}}>
+                          {/* Top 3 Crop Cards Selector */}
+                          <div>
+                            <div style={{fontSize:'.85rem',fontWeight:700,color:'#888',marginBottom:'.5rem',textTransform:'uppercase'}}>
+                              🏆 Top 3 Recommended Crops by Suitability Score
+                            </div>
+                            <div className="grid3">
+                              {cropRecommendations.map((crop, idx) => (
+                                <div
+                                  key={crop.name}
+                                  onClick={() => setSelectedCropRank(idx)}
+                                  className="card"
+                                  style={{
+                                    border: selectedCropRank === idx ? '2px solid #22c55e' : '1px solid #2a2a2a',
+                                    background: selectedCropRank === idx ? 'linear-gradient(145deg, #122b1c 0%, #0d1e14 100%)' : '#1a1a1a',
+                                    cursor: 'pointer',
+                                    padding: '1.25rem',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '.5rem',
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                                    <span style={{fontSize:'.75rem',fontWeight:800,color:idx===0?'#4ade80':idx===1?'#60a5fa':'#facc15'}}>{crop.rank}</span>
+                                    <span style={{fontSize:'.72rem',background:'rgba(255,255,255,0.08)',padding:'.15rem .45rem',borderRadius:4,color:'#aaa'}}>{crop.category}</span>
+                                  </div>
+                                  <div style={{fontSize:'1.3rem',fontWeight:800,color:'#fff',display:'flex',alignItems:'center',gap:'.4rem'}}>
+                                    <span>{crop.icon}</span> {crop.name}
+                                  </div>
+                                  <div style={{display:'flex',alignItems:'baseline',gap:'.4rem',marginTop:'.3rem'}}>
+                                    <span style={{fontSize:'1.5rem',fontWeight:800,color:'#22c55e'}}>{crop.suitabilityScore}%</span>
+                                    <span style={{fontSize:'.75rem',color:'#888',fontWeight:600}}>{t.suitabilityScore}</span>
+                                  </div>
+                                  <div style={{fontSize:'.75rem',color:'#94a3b8',borderTop:'1px solid rgba(255,255,255,0.06)',paddingTop:'.4rem'}}>
+                                    Est. Net: <strong style={{color:'#f1f1f1'}}>{crop.totalEstProfit}</strong> ({crop.estProfitPerAcre}/acre)
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Active Crop Detailed Plan */}
+                          {activeRec && (
+                            <div style={{display:'flex',flexDirection:'column',gap:'1.25rem'}}>
+                              {/* 🧠 Explainable AI Panel */}
+                              <div className="card" style={{borderLeft:'4px solid #3b82f6'}}>
+                                <div className="section-title" style={{color:'#60a5fa'}}>
+                                  {t.whyAiRecommended} ({activeRec.name})
+                                </div>
+                                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:'.75rem'}}>
+                                  {activeRec.whyExplanation.map((why, i) => (
+                                    <div key={i} style={{background:'#1f1f1f',borderRadius:8,padding:'.75rem .9rem',border:'1px solid #2a2a2a'}}>
+                                      <div style={{display:'flex',alignItems:'center',gap:'.4rem',marginBottom:'.2rem'}}>
+                                        <span style={{color:why.icon==='✓'?'#22c55e':'#f59e0b',fontWeight:800}}>{why.icon}</span>
+                                        <span style={{fontSize:'.82rem',fontWeight:700,color:'#fff'}}>{why.title}</span>
+                                      </div>
+                                      <div style={{fontSize:'.75rem',color:'#aaa',lineHeight:1.45}}>{why.detail}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* 📋 Complete Farm Action Plan */}
+                              <div className="grid2">
+                                {/* Left Column: Sowing & Fertilizer */}
+                                <div className="card">
+                                  <div className="section-title">🌾 Sowing & Precision Fertilizer Schedule</div>
+                                  <div style={{display:'flex',flexDirection:'column',gap:'.75rem'}}>
+                                    <div style={{background:'#1f1f1f',borderRadius:8,padding:'.75rem',border:'1px solid #2a2a2a'}}>
+                                      <div style={{fontSize:'.72rem',color:'#888',textTransform:'uppercase',fontWeight:700}}>Sowing Window & Seed Rate</div>
+                                      <div style={{fontSize:'.85rem',fontWeight:700,color:'#4ade80',marginTop:'.2rem'}}>📅 {activeRec.sowingWindow}</div>
+                                      <div style={{fontSize:'.78rem',color:'#ccc',marginTop:'.2rem'}}>🌱 Seed Rate: {activeRec.seedRate}</div>
+                                      <div style={{fontSize:'.78rem',color:'#ccc',marginTop:'.2rem'}}>📦 Expected Yield: {activeRec.yieldRange}</div>
+                                    </div>
+
+                                    {activeRec.fertilizerStages.map((st, i) => (
+                                      <div key={i} style={{background:'#1f1f1f',borderRadius:8,padding:'.75rem',border:'1px solid #2a2a2a'}}>
+                                        <div style={{fontSize:'.78rem',fontWeight:700,color:'#60a5fa'}}>{st.stage}</div>
+                                        <div style={{fontSize:'.78rem',color:'#aaa',marginTop:'.2rem',lineHeight:1.45}}>{st.desc}</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Right Column: Irrigation & Disease Risks */}
+                                <div className="card">
+                                  <div className="section-title">💧 Water & Disease Management</div>
+                                  <div style={{display:'flex',flexDirection:'column',gap:'.75rem'}}>
+                                    <div style={{background:'#1f1f1f',borderRadius:8,padding:'.75rem',border:'1px solid #2a2a2a'}}>
+                                      <div style={{fontSize:'.72rem',color:'#888',textTransform:'uppercase',fontWeight:700}}>Irrigation Protocol ({activeRec.irrigationPlan.method})</div>
+                                      <div style={{fontSize:'.82rem',color:'#60a5fa',marginTop:'.2rem',fontWeight:600}}>💧 Total Need: {activeRec.irrigationPlan.requirement}</div>
+                                      <div style={{fontSize:'.78rem',color:'#aaa',marginTop:'.2rem'}}>{activeRec.irrigationPlan.stages}</div>
+                                      <div style={{fontSize:'.78rem',color:'#4ade80',marginTop:'.2rem'}}>{activeRec.irrigationPlan.schedule}</div>
+                                    </div>
+
+                                    <div style={{background:'#1f1f1f',borderRadius:8,padding:'.75rem',border:'1px solid #2a2a2a'}}>
+                                      <div style={{fontSize:'.72rem',color:'#888',textTransform:'uppercase',fontWeight:700}}>Disease Threats & Prevention</div>
+                                      {activeRec.diseaseRisks.map((d, i) => (
+                                        <div key={i} style={{fontSize:'.78rem',color:'#fca5a5',marginTop:'.3rem',lineHeight:1.4}}>
+                                          • {d}
+                                        </div>
+                                      ))}
+                                    </div>
+
+                                    {/* 🛒 Link to Marketplace Inputs */}
+                                    <div style={{background:'rgba(34,197,94,0.08)',borderRadius:8,padding:'.75rem',border:'1px solid rgba(34,197,94,0.2)'}}>
+                                      <div style={{fontSize:'.75rem',fontWeight:700,color:'#4ade80',marginBottom:'.4rem'}}>
+                                        🛒 Required Farming Inputs (In Agri Store)
+                                      </div>
+                                      <div style={{display:'flex',gap:'.4rem',flexWrap:'wrap'}}>
+                                        {activeRec.matchingInputs.map(inp => (
+                                          <span key={inp} style={{background:'#1a1a1a',color:'#f1f1f1',fontSize:'.72rem',padding:'.2rem .5rem',borderRadius:4,border:'1px solid #333'}}>
+                                            {inp}
+                                          </span>
+                                        ))}
+                                      </div>
+                                      <button 
+                                        className="btn btn-primary" 
+                                        style={{width:'100%',marginTop:'.65rem',fontSize:'.8rem',padding:'.45rem'}}
+                                        onClick={() => {
+                                          setActiveTab('marketplace');
+                                          setMarketSearchInput(activeRec.name.split(' ')[0]);
+                                        }}
+                                      >
+                                        🛍️ View & Buy Inputs in Marketplace →
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Agricultural Expert Disclaimer */}
+                              <div style={{background:'#181818',border:'1px solid #2a2a2a',borderRadius:8,padding:'.75rem 1rem',fontSize:'.75rem',color:'#888',lineHeight:1.5}}>
+                                {t.disclaimer}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
-            {/* ════ DISEASE SCANNER ════ */}
-            {activeTab==='scanner' && (
-              <div className="grid2">
-                <div className="card">
-                  <div className="section-title">🔬 AI Leaf Disease Scanner</div>
-                  <p style={{fontSize:'.85rem',color:'#888',marginBottom:'1rem'}}>Select a sample leaf type and click Scan to simulate AI disease detection.</p>
-                  <div style={{display:'flex',gap:'.6rem',flexWrap:'wrap',marginBottom:'1rem'}}>
-                    {[{id:'spot',label:'🍅 Tomato Leaf Spot'},{id:'blast',label:'🌾 Rice Blast'},{id:'healthy',label:'🌿 Healthy Cotton'}].map(s=>(
-                      <button key={s.id} className={`scan-btn${scanTarget===s.id?' active':''}`} onClick={()=>{setScanTarget(s.id);setScanResult(null);}}>{s.label}</button>
-                    ))}
+            {/* ════ PLANT HEALTH SCANNER ════ */}
+            {activeTab==='scanner' && (() => {
+              const currentReport = diseaseReport || PLANT_DISEASES_DB[scanCropType];
+
+              return (
+                <div className="grid2">
+                  {/* Left Column: Camera Upload & Scanner */}
+                  <div className="card">
+                    <div className="section-title">🔬 Plant Health & Leaf Scanner</div>
+                    <p style={{fontSize:'.82rem',color:'#888',marginBottom:'1rem'}}>
+                      Upload a photo of an affected leaf or choose a crop scenario to initiate AI automated agronomic scanning.
+                    </p>
+
+                    {/* Crop Target Presets */}
+                    <div style={{display:'flex',gap:'.4rem',flexWrap:'wrap',marginBottom:'1rem'}}>
+                      {[
+                        { id:'tomato_blight', label:'🍅 Tomato Early Blight' },
+                        { id:'rice_blast', label:'🌾 Rice Blast' },
+                        { id:'cotton_blight', label:'☁️ Cotton Bacterial Blight' },
+                        { id:'chilli_anthracnose', label:'🌶️ Chilli Anthracnose' },
+                        { id:'healthy_leaf', label:'🌿 Healthy Leaf' },
+                      ].map(s => (
+                        <button
+                          key={s.id}
+                          className={`scan-btn${scanCropType===s.id?' active':''}`}
+                          onClick={() => {
+                            setScanCropType(s.id);
+                            setUploadedScanImage(null);
+                            setDiseaseReport(null);
+                          }}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Camera Photo Upload Buttons */}
+                    <div style={{display:'flex',gap:'.5rem',marginBottom:'1rem'}}>
+                      <label className="btn btn-outline" style={{flex:1,cursor:'pointer',fontSize:'.8rem'}}>
+                        📷 Take / Upload Leaf Photo
+                        <input type="file" accept="image/*" style={{display:'none'}} onChange={handlePhotoUpload} />
+                      </label>
+                      <button className="btn btn-primary" style={{flex:1,fontSize:'.8rem'}} onClick={triggerScan}>
+                        ⚡ Run AI Diagnosis
+                      </button>
+                    </div>
+
+                    {/* Viewport with Laser Animation */}
+                    <div style={{
+                      background: '#151515',
+                      border: '2px dashed #333',
+                      borderRadius: 12,
+                      height: 260,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}>
+                      {uploadedScanImage || currentReport?.sampleImage ? (
+                        <img
+                          src={uploadedScanImage || currentReport?.sampleImage}
+                          alt="Leaf Specimen"
+                          style={{width:'100%',height:'100%',objectFit:'cover'}}
+                        />
+                      ) : (
+                        <div style={{textAlign:'center',padding:'1rem'}}>
+                          <div style={{fontSize:'3rem'}}>🍃</div>
+                          <div style={{color:'#888',fontSize:'.8rem',marginTop:'.5rem'}}>Select specimen or upload photo</div>
+                        </div>
+                      )}
+
+                      {/* Laser scanning beam */}
+                      {isScanning && (
+                        <div style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'rgba(34,197,94,0.15)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <div style={{fontSize:'2.5rem',animation:'pulse 1s infinite'}}>🔬</div>
+                          <div style={{color:'#22c55e',fontWeight:800,fontSize:'.9rem',marginTop:'.5rem'}}>
+                            Analyzing Leaf Pathogens...
+                          </div>
+                          <div style={{
+                            position: 'absolute',
+                            height: 3,
+                            background: 'linear-gradient(90deg, transparent, #22c55e, #4ade80, transparent)',
+                            width: '100%',
+                            left: 0,
+                            animation: 'scanLine 1.5s linear infinite'
+                          }}></div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div onClick={triggerScan} style={{background:'#1f1f1f',border:'2px dashed #333',borderRadius:12,height:240,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',position:'relative',overflow:'hidden'}}>
-                    {scanning ? (
-                      <div style={{textAlign:'center'}}>
-                        <div style={{fontSize:'2rem',animation:'pulse 1s infinite'}}>🔬</div>
-                        <div style={{color:'#22c55e',fontWeight:700,marginTop:'.5rem'}}>Analyzing Leaf Sample…</div>
-                        <div style={{position:'absolute',height:2,background:'linear-gradient(90deg,transparent,#22c55e,transparent)',width:'100%',left:0,animation:'scanLine 1.5s linear infinite'}}></div>
+
+                  {/* Right Column: Diagnostic Report */}
+                  <div className="card">
+                    <div className="section-title">📋 Diagnostic Report & Treatment</div>
+
+                    {currentReport ? (
+                      <div style={{display:'flex',flexDirection:'column',gap:'.9rem',animation:'fadeIn .3s ease'}}>
+                        {/* Header Box */}
+                        <div style={{
+                          background: currentReport.riskLevel === 'None' ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                          border: `1px solid ${currentReport.riskLevel === 'None' ? '#22c55e' : '#ef4444'}`,
+                          borderRadius: 10,
+                          padding: '1rem',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{fontSize:'1.15rem',fontWeight:800,color:currentReport.riskColor}}>{currentReport.disease}</div>
+                          <div style={{fontSize:'.8rem',color:'#888',marginTop:'.25rem'}}>
+                            Confidence: <strong style={{color:'#f1f1f1'}}>{currentReport.confidence}</strong> | Risk Level: <strong style={{color:currentReport.riskColor}}>{currentReport.riskLevel}</strong>
+                          </div>
+                        </div>
+
+                        {/* Symptoms Checklist */}
+                        <div style={{background:'#1f1f1f',borderRadius:8,padding:'.85rem',border:'1px solid #2a2a2a'}}>
+                          <div style={{fontSize:'.75rem',fontWeight:700,color:'#60a5fa',marginBottom:'.3rem',textTransform:'uppercase'}}>🔍 Diagnostic Symptoms</div>
+                          {currentReport.symptoms.map((sym, i) => (
+                            <div key={i} style={{fontSize:'.78rem',color:'#cbd5e1',marginTop:'.2rem',lineHeight:1.4}}>
+                              • {sym}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Immediate Steps */}
+                        <div style={{background:'#1f1f1f',borderRadius:8,padding:'.85rem',border:'1px solid #2a2a2a'}}>
+                          <div style={{fontSize:'.75rem',fontWeight:700,color:'#f59e0b',marginBottom:'.3rem',textTransform:'uppercase'}}>🚨 Immediate Action Steps</div>
+                          {currentReport.immediateSteps.map((step, i) => (
+                            <div key={i} style={{fontSize:'.78rem',color:'#e2e8f0',marginTop:'.25rem',lineHeight:1.4}}>
+                              {step}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Dual Treatment */}
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'.6rem'}}>
+                          <div style={{background:'#1f1f1f',borderRadius:8,padding:'.75rem',border:'1px solid #2a2a2a'}}>
+                            <div style={{fontSize:'.72rem',fontWeight:700,color:'#4ade80',marginBottom:'.2rem'}}>🌿 Organic Treatment</div>
+                            <div style={{fontSize:'.74rem',color:'#aaa',lineHeight:1.4}}>{currentReport.organicRemedy}</div>
+                          </div>
+                          <div style={{background:'#1f1f1f',borderRadius:8,padding:'.75rem',border:'1px solid #2a2a2a'}}>
+                            <div style={{fontSize:'.72rem',fontWeight:700,color:'#f87171',marginBottom:'.2rem'}}>🧪 Chemical Remedy</div>
+                            <div style={{fontSize:'.74rem',color:'#aaa',lineHeight:1.4}}>{currentReport.chemicalRemedy}</div>
+                          </div>
+                        </div>
+
+                        {/* Buy Medicine in Store */}
+                        {currentReport.marketplaceMatch && (
+                          <button
+                            className="btn btn-primary"
+                            style={{width:'100%',padding:'.65rem',fontWeight:700,fontSize:'.85rem'}}
+                            onClick={() => {
+                              setActiveTab('marketplace');
+                              setMarketSearchInput(currentReport.marketplaceMatch.split(' ')[0]);
+                            }}
+                          >
+                            🛒 Buy {currentReport.marketplaceMatch} in Agri Store →
+                          </button>
+                        )}
                       </div>
                     ) : (
-                      <div style={{textAlign:'center',padding:'1.5rem'}}>
-                        <div style={{fontSize:'3rem'}}>📸</div>
-                        <div style={{fontWeight:600,color:'#f1f1f1',marginTop:'.7rem'}}>Click to Start AI Scan</div>
-                        <div style={{fontSize:'.78rem',color:'#888',marginTop:'.4rem'}}>Mode: {scanTarget==='spot'?'Tomato Leaf Spot':scanTarget==='blast'?'Rice Blast':'Healthy Cotton'}</div>
+                      <div style={{textAlign:'center',padding:'3rem',opacity:0.5}}>
+                        <span style={{fontSize:'3rem'}}>🔬</span>
+                        <p style={{color:'#888',fontSize:'.85rem',marginTop:'1rem'}}>Select specimen or upload photo to diagnose.</p>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="card">
-                  <div className="section-title">📋 Diagnosis Report</div>
-                  {scanResult ? (
-                    <div style={{display:'flex',flexDirection:'column',gap:'.85rem',animation:'fadeIn .5s ease'}}>
-                      <div style={{background:scanResult.danger==='None'?'rgba(34,197,94,.08)':scanResult.danger==='High'?'rgba(239,68,68,.08)':'rgba(251,146,60,.08)',border:`1px solid ${scanResult.danger==='None'?'rgba(34,197,94,.25)':scanResult.danger==='High'?'rgba(239,68,68,.25)':'rgba(251,146,60,.25)'}`,borderRadius:10,padding:'1rem',textAlign:'center'}}>
-                        <div style={{fontSize:'1.1rem',fontWeight:800,color:scanResult.danger==='None'?'#22c55e':scanResult.danger==='High'?'#ef4444':'#f97316'}}>{scanResult.disease}</div>
-                        <div style={{fontSize:'.82rem',color:'#888',marginTop:'.25rem'}}>Confidence: <strong style={{color:'#f1f1f1'}}>{scanResult.confidence}</strong> | Risk: <strong style={{color:scanResult.danger==='None'?'#22c55e':scanResult.danger==='High'?'#ef4444':'#f97316'}}>{scanResult.danger}</strong></div>
-                      </div>
-                      {[['🛡️ Treatment',scanResult.medicine],['⚠️ Prevention',scanResult.prevention]].map(([t,v])=>(
-                        <div key={t} style={{background:'#1f1f1f',border:'1px solid #2a2a2a',borderRadius:10,padding:'1rem'}}>
-                          <div style={{fontWeight:700,color:'#f1f1f1',marginBottom:'.4rem'}}>{t}</div>
-                          <p style={{fontSize:'.85rem',color:'#888',lineHeight:1.6}}>{v}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:300,gap:'1rem',opacity:.5,textAlign:'center'}}>
-                      <span style={{fontSize:'3rem'}}>🔬</span>
-                      <p style={{color:'#888',fontSize:'.9rem'}}>Click on the scanner panel to analyze.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* ════ MARKET & PRICES ════ */}
             {activeTab==='market' && (
@@ -2492,6 +3649,56 @@ export default function App() {
           </main>
         </div>
       </div>
+
+      {/* ═══ Mobile Bottom Navigation (5 key actions: Home, AI, Market, Orders, Me) ═══ */}
+      <nav className="mobile-bottom-nav">
+        <div className="mobile-bottom-nav-inner">
+          <button 
+            className={`bottom-nav-btn ${activeTab==='overview' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('overview'); setIsSidebarOpen(false); }}
+          >
+            <span className="bn-icon">🏡</span>
+            <span className="bn-label">Home</span>
+          </button>
+          
+          <button 
+            className={`bottom-nav-btn ${(activeTab==='advisor' || activeTab==='scanner') ? 'active' : ''}`}
+            onClick={() => { setActiveTab('advisor'); setIsSidebarOpen(false); }}
+          >
+            <span className="bn-icon">🌱</span>
+            <span className="bn-label">AI Farm</span>
+          </button>
+          
+          <button 
+            className={`bottom-nav-btn ${activeTab==='marketplace' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('marketplace'); setIsSidebarOpen(false); }}
+          >
+            <span className="bn-icon">🛒</span>
+            <span className="bn-label">Market</span>
+            {cart.length > 0 && (
+              <span className="bottom-nav-badge">
+                {cart.reduce((s,i)=>s+i.quantity,0)}
+              </span>
+            )}
+          </button>
+          
+          <button 
+            className={`bottom-nav-btn ${activeTab==='expenses' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('expenses'); setIsSidebarOpen(false); }}
+          >
+            <span className="bn-icon">📦</span>
+            <span className="bn-label">Orders</span>
+          </button>
+          
+          <button 
+            className={`bottom-nav-btn ${(activeTab==='chat' || activeTab==='schemes') ? 'active' : ''}`}
+            onClick={() => { setActiveTab('chat'); setIsSidebarOpen(false); }}
+          >
+            <span className="bn-icon">👤</span>
+            <span className="bn-label">Me</span>
+          </button>
+        </div>
+      </nav>
 
       {/* ── Cart Sidebar Panel ── */}
       <div className={`cart-overlay${isCartOpen ? ' open' : ''}`} onClick={() => setIsCartOpen(false)} />
