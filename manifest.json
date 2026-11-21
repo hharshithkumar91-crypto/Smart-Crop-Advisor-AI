@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Smart Crop AI",
+  "name": "Smart Crop Advisor AI — Farm Smarter, Earn Better",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,8 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#166534",
+  "background_color": "#F4F6FA",
+  "categories": ["agriculture", "shopping", "business"],
+  "description": "India's AI-powered agriculture platform. Live mandi prices, crop advisory, P2P farm marketplace, disease scanner, and government schemes — built for Indian farmers."
 }
